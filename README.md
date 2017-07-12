@@ -1,20 +1,22 @@
 # chess-engine-clj
 
-FIXME: description
+(_**WIP**_)
+
+A command-line chess engine in clojure.
 
 ## Installation
 
-Download from http://example.com/FIXME.
+...
 
 ## Usage
 
-FIXME: explanation
-
-    $ java -jar chess-engine-clj-0.1.0-standalone.jar [args]
+```
+lein run
+```
 
 ## Options
 
-FIXME: listing of options this app accepts.
+...
 
 ## Examples
 
@@ -22,15 +24,11 @@ FIXME: listing of options this app accepts.
 
 ### Bugs
 
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+Please file any issues you find on github with minimal sample code that demonstrates the problem.
 
 ## License
 
-Copyright © 2017 FIXME
+Copyright © 2017 p4v4n
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
