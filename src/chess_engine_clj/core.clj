@@ -4,4 +4,6 @@
 
 (defn -main
   []
+  (while true
+  	(engine/read-move))
   )

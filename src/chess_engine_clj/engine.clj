@@ -20,7 +20,8 @@
 
 (def uni-pieces {\R "♜", \N "♞", \B "♝", \Q "♛", \K "♚", \P "♟",
                  \r "♖", \n "♘", \b "♗", \q "♕", \k "♔", \p "♙", \- "·"})
-;;---------
+
+;;-----Printing the Board at Command Line-----
 
 (defn line-convert [l-vec]
     (->> (map uni-pieces l-vec)
@@ -28,7 +29,7 @@
          string/join))
 
 (defn pretty-print []
-    (->> (partition 8 initial-board)
+    (->> (partition 8 (:board @board-state))
          (map line-convert)
          (map #(str (- 8 %1) %2) (range 8))
          (string/join "\n")
@@ -36,4 +37,33 @@
 
 (println (pretty-print))
 
-;;----------
+;;------------------------------
+(defn parse-square [square-id]
+    (let [[fil-id rank] [(subs square-id 0 1) (Integer/parseInt (subs square-id 1))]
+          fil (->> [fil-id "a"]
+                   (map #(int (.charAt % 0)))
+                   (reduce -))]
+        (- (+ 64 fil) (* 8  rank))))
+
+(defn make-move [first-id second-id]
+    (let [[i j] (sort [first-id second-id])]
+    (if (< first-id second-id)
+        (swap! board-state assoc :board 
+                           (vec (concat (subvec (:board @board-state) 0 i)
+                                        [\-]
+                                        (subvec (:board @board-state) (inc i) j)
+                                        [(nth (:board @board-state) i)]
+                                        (subvec (:board @board-state) (inc j)))))
+        (swap! board-state assoc :board 
+                           (vec (concat (subvec (:board @board-state) 0 i)
+                                        [(nth (:board @board-state) j)]
+                                        (subvec (:board @board-state) (inc i) j)
+                                        [\-]
+                                        (subvec (:board @board-state) (inc j))))))    
+     (println (pretty-print))))
+
+(defn read-move []
+    (println "Enter Move:")
+    (let [move (string/trim (read-line))
+         [full-move s1 s2] (re-find #"^([a-h][1-8])([a-h][1-8])$" move)]
+        (make-move (parse-square s1) (parse-square s2))))
