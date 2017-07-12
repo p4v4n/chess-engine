@@ -1,7 +1,7 @@
 (ns chess-engine-clj.core
+    (:require [chess-engine-clj.engine :as engine])
   (:gen-class))
 
 (defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (println "Hello, World!"))
+  []
+  )
