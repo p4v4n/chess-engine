@@ -21,6 +21,17 @@
 (def uni-pieces {\R "♜", \N "♞", \B "♝", \Q "♛", \K "♚", \P "♟",
                  \r "♖", \n "♘", \b "♗", \q "♕", \k "♔", \p "♙", \- "·"})
 
+;;-----Generating Moves ----------
+;;Black is engine always
+;;Dummy List
+(def engine-valid-move-list ["a7a5" "b7b5" "c7c5" "d7d5" "e7e5" "f7f5" "g7g5" "h7h5"])
+
+(defn engine-move-pick []
+    "Picks a random move from the engine-valid-move-list"
+    (->> (count engine-valid-move-list)
+         (rand-int)
+         (get engine-valid-move-list)))
+
 ;;-----Printing the Board at Command Line-----
 
 (defn line-convert [l-vec]
