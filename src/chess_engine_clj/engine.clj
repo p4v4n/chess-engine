@@ -23,6 +23,25 @@
 
 ;;-----Generating Moves ----------
 ;;Black is engine always
+(def N -8)
+(def E 1)
+(def S 8)
+(def W -1)
+(def directions {"p" [S (+ S S) (+ S W) (+ S E)]
+                 "n" [(+ N N E) (+ E N E) (+ E S E) (+ S S E) (+ S S W) (+ W S W) (+ W N W) (+ N N W)]
+                 "b" [(+ N E) (+ S E) (+ N W) (+ S W)]
+                 "r" [N E S W]
+                 "q" [N E S W (+ N E) (+ S E) (+ N W) (+ S W)]
+                 "k" [N E S W (+ N E) (+ S E) (+ N W) (+ S W)]})
+
+
+(defn black-piece-location []
+  "Returns the indices for location of black pieces"
+  (filter (comp #(Character/isLowerCase %)
+                #(nth (:board @board-state) %))
+           (range 64)))
+
+
 ;;Dummy List
 (def engine-valid-move-list ["a7a5" "b7b5" "c7c5" "d7d5" "e7e5" "f7f5" "g7g5" "h7h5"])
 
