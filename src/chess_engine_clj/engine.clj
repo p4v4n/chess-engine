@@ -73,8 +73,15 @@
                                         (subvec (:board @board-state) (inc j))))))    
      (println (pretty-print))))
 
-(defn read-move []
-    (println "Enter Move:")
-    (let [move (string/trim (read-line))
-         [full-move s1 s2] (re-find #"^([a-h][1-8])([a-h][1-8])$" move)]
+(defn read-move [move]
+    (let [[full-move s1 s2] (re-find #"^([a-h][1-8])([a-h][1-8])$" move)]
         (make-move (parse-square s1) (parse-square s2))))
+
+(defn game-play []
+    (println "Your Move: ")
+    (let [user-move (string/trim (read-line))]
+      (read-move user-move))
+    (Thread/sleep 2000)
+    (let [engine-move (engine-move-pick)]
+      (println (str "My Move: " engine-move "\n"))
+      (read-move engine-move)))
