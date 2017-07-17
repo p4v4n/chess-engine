@@ -51,6 +51,15 @@
                  y (range 8)]
                 [x y])))
 
+(defn inside-the-board? [[i j]]
+    (and (<= 0 i 7) (<= 0 j 7)))
+
+(defn knight-moves-vec [curr-locn]
+    (->> knight-moves
+         (map #(mapv + curr-locn %))
+         (filter inside-the-board?)
+         (mapv #(vector curr-locn %))))
+
 ;;Dummy List
 (def engine-valid-move-list ["a7a5" "b7b5" "c7c5" "d7d5" "e7e5" "f7f5" "g7g5" "h7h5"])
 
