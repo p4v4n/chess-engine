@@ -1,14 +1,14 @@
 (ns chess-engine-clj.engine
     (:require [clojure.string :as string]))
 
-(def initial-board [\r \n \b \q \k \b \n \r
-                    \p \p \p \p \p \p \p \p
-                    \- \- \- \- \- \- \- \-
-                    \- \- \- \- \- \- \- \-
-                    \- \- \- \- \- \- \- \-
-                    \- \- \- \- \- \- \- \-
-                    \P \P \P \P \P \P \P \P
-                    \R \N \B \Q \K \B \N \R])
+(def initial-board [[\r \n \b \q \k \b \n \r]
+                    [\p \p \p \p \p \p \p \p]
+                    [\- \- \- \- \- \- \- \-]
+                    [\- \- \- \- \- \- \- \-]
+                    [\- \- \- \- \- \- \- \-]
+                    [\- \- \- \- \- \- \- \-]
+                    [\P \P \P \P \P \P \P \P]
+                    [\R \N \B \Q \K \B \N \R]])
 
 (def board-state (atom {:board initial-board
                         :turn "white"
@@ -41,7 +41,6 @@
                 #(nth (:board @board-state) %))
            (range 64)))
 
-
 ;;Dummy List
 (def engine-valid-move-list ["a7a5" "b7b5" "c7c5" "d7d5" "e7e5" "f7f5" "g7g5" "h7h5"])
 
@@ -59,7 +58,7 @@
          string/join))
 
 (defn pretty-print []
-    (->> (partition 8 (:board @board-state))
+    (->> (:board @board-state)
          (map line-convert)
          (map #(str (- 8 %1) %2) (range 8))
          (string/join "\n")
@@ -73,24 +72,15 @@
           fil (->> [fil-id "a"]
                    (map #(int (.charAt % 0)))
                    (reduce -))]
-        (- (+ 64 fil) (* 8  rank))))
+        [(- 8 rank) fil]))
 
 (defn make-move [first-id second-id]
-    (let [[i j] (sort [first-id second-id])]
-    (if (< first-id second-id)
-        (swap! board-state assoc :board 
-                           (vec (concat (subvec (:board @board-state) 0 i)
-                                        [\-]
-                                        (subvec (:board @board-state) (inc i) j)
-                                        [(nth (:board @board-state) i)]
-                                        (subvec (:board @board-state) (inc j)))))
-        (swap! board-state assoc :board 
-                           (vec (concat (subvec (:board @board-state) 0 i)
-                                        [(nth (:board @board-state) j)]
-                                        (subvec (:board @board-state) (inc i) j)
-                                        [\-]
-                                        (subvec (:board @board-state) (inc j))))))    
-     (println (pretty-print))))
+    (let [[i1 j1] first-id
+          [i2 j2] second-id
+          moving-piece (get-in @board-state [:board i1 j1])]
+          (swap! board-state assoc-in [:board i1 j1] \-)
+          (swap! board-state assoc-in [:board i2 j2] moving-piece))
+    (println (pretty-print)))
 
 (defn read-move [move]
     (let [[full-move s1 s2] (re-find #"^([a-h][1-8])([a-h][1-8])$" move)]
