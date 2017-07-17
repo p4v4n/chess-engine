@@ -22,24 +22,34 @@
                  \r "♖", \n "♘", \b "♗", \q "♕", \k "♔", \p "♙", \- "·"})
 
 ;;-----Generating Moves ----------
-;;Black is engine always
-(def N -8)
-(def E 1)
-(def S 8)
-(def W -1)
-(def directions {"p" [S (+ S S) (+ S W) (+ S E)]
-                 "n" [(+ N N E) (+ E N E) (+ E S E) (+ S S E) (+ S S W) (+ W S W) (+ W N W) (+ N N W)]
-                 "b" [(+ N E) (+ S E) (+ N W) (+ S W)]
-                 "r" [N E S W]
-                 "q" [N E S W (+ N E) (+ S E) (+ N W) (+ S W)]
-                 "k" [N E S W (+ N E) (+ S E) (+ N W) (+ S W)]})
+
+(def dir-up [-1 0])
+(def dir-down [+1 0])
+(def dir-left [0 -1])
+(def dir-right [0 +1])
+(def dir-up-left [-1 -1])
+(def dir-up-right [-1 +1])
+(def dir-down-left [+1 -1])
+(def dir-down-right [+1 +1])
+
+(def rook-directions [dir-up dir-down dir-left dir-right])
+(def bishop-directions [dir-up-left dir-up-right dir-down-left dir-down-right])
+(def all-directions (concat rook-directions bishop-directions))
+(def knight-moves [[-2 -1] [-1 -2] [+1 -2] [+2 -1]
+                   [-2 +1] [-1 +2] [+1 +2] [+2 +1]])
+
+(def king-basic-moves all-directions)
+(def pawn-basic-moves [[+1 0] [+2 0]])
+(def queen-moves all-directions)
 
 
 (defn black-piece-location []
   "Returns the indices for location of black pieces"
   (filter (comp #(Character/isLowerCase %)
-                #(nth (:board @board-state) %))
-           (range 64)))
+                #(get-in (:board @board-state) %))
+           (for [x (range 8)
+                 y (range 8)]
+                [x y])))
 
 ;;Dummy List
 (def engine-valid-move-list ["a7a5" "b7b5" "c7c5" "d7d5" "e7e5" "f7f5" "g7g5" "h7h5"])
