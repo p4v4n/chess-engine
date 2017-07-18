@@ -74,6 +74,16 @@
                 (cons (first s) nil)
                 (cons (first s) (take-until pred (rest s)))))))
 
+(defn id-to-square [[i j]]
+    (let [fil (char (+ (int \a) j))
+          rank (- 8 i)]
+          (str fil rank)))
+
+(defn id-to-move-str [[id1 id2]]
+    (->> [id1 id2]
+         (map id-to-square)
+         (apply str)))
+
 ;-----Knight---------
 
 (defn knight-moves-vec [curr-locn]
@@ -116,7 +126,7 @@
 (defn long-range-moves-single-dirn [curr-locn step]
     (->> (range 1 8)
          (map #(mapv (partial * %) step))
-         (map #(map + curr-locn %))
+         (map #(mapv + curr-locn %))
          (filter inside-the-board?)
          (take-until white-piece?)
          (take-while #(not (black-piece? %)))))
@@ -131,14 +141,22 @@
 (def rook-moves-vec #(long-range-moves-all-dirn % rook-directions))
 (def bishop-moves-vec #(long-range-moves-all-dirn % bishop-directions))
 
-;;Dummy List
-(def engine-valid-move-list ["a7a5" "b7b5" "c7c5" "d7d5" "e7e5" "f7f5" "g7g5" "h7h5"])
+;---------
+
+(def piece-function-map {\n knight-moves-vec \k king-basic-moves-vec \p pawn-moves-vec
+                         \q queen-moves-vec \r rook-moves-vec \b bishop-moves-vec})
+
+(defn engine-valid-move-list []
+    (->> (black-piece-location)
+         (mapv #((piece-function-map (get-in (:board @board-state) %)) %))
+         (apply concat)
+         (mapv id-to-move-str)))
 
 (defn engine-move-pick []
     "Picks a random move from the engine-valid-move-list"
-    (->> (count engine-valid-move-list)
+    (->> (count (engine-valid-move-list))
          (rand-int)
-         (get engine-valid-move-list)))
+         (get (engine-valid-move-list))))
 
 ;;-----Printing the Board at Command Line-----
 
