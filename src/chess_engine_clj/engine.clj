@@ -40,6 +40,7 @@
 
 (def king-basic-moves all-directions)
 (def pawn-basic-moves [[+1 0] [+2 0]])
+(def pawn-capture-moves [[+1 +1] [+1 -1]])
 (def queen-moves all-directions)
 
 
@@ -92,6 +93,13 @@
         (map #(mapv + curr-locn %))
         (take-while empty-square?)
         (mapv #(vector curr-locn %))))
+
+(defn pawn-capture-moves-vec [curr-locn]
+    (->> pawn-capture-moves
+         (map #(mapv + curr-locn %))
+         (filter inside-the-board?)
+         (filter white-piece?)
+         (mapv #(vector curr-locn %))))
 
 (defn long-range-moves-single-dirn [curr-locn step]
     (->> (range 1 8)
