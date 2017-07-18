@@ -101,6 +101,12 @@
          (take-until white-piece?)
          (take-while #(not (black-piece? %)))))
 
+(defn long-range-moves-all-dirn [curr-locn dirn-vec]
+    (->> dirn-vec
+         (map #(long-range-moves-single-dirn curr-locn %))
+         (apply concat)
+         ))
+
 ;;Dummy List
 (def engine-valid-move-list ["a7a5" "b7b5" "c7c5" "d7d5" "e7e5" "f7f5" "g7g5" "h7h5"])
 
