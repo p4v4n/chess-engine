@@ -58,6 +58,10 @@
     (->> (get-in @board-state [:board i j])
          (#(Character/isLowerCase %))))
 
+(defn empty-square? [[i j]]
+    (->> (get-in @board-state [:board i j])
+         (= \-)))
+
 (defn knight-moves-vec [curr-locn]
     (->> knight-moves
          (map #(mapv + curr-locn %))
@@ -70,6 +74,12 @@
         (map #(mapv + curr-locn %))
         (filter inside-the-board?)
         (remove black-piece?)
+        (mapv #(vector curr-locn %))))
+
+(defn pawn-basic-moves-vec [curr-locn]
+   (->> pawn-basic-moves
+        (map #(mapv + curr-locn %))
+        (take-while empty-square?)
         (mapv #(vector curr-locn %))))
 
 ;;Dummy List
