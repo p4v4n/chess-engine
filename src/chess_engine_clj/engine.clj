@@ -105,7 +105,11 @@
     (->> dirn-vec
          (map #(long-range-moves-single-dirn curr-locn %))
          (apply concat)
-         ))
+         (mapv #(vector curr-locn %))))
+
+(def queen-moves-vec #(long-range-moves-all-dirn % all-directions))
+(def rook-moves-vec #(long-range-moves-all-dirn % rook-directions))
+(def bishop-moves-vec #(long-range-moves-all-dirn % bishop-directions))
 
 ;;Dummy List
 (def engine-valid-move-list ["a7a5" "b7b5" "c7c5" "d7d5" "e7e5" "f7f5" "g7g5" "h7h5"])
