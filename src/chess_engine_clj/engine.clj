@@ -105,7 +105,9 @@
 ;--------Pawn----------
 
 (defn pawn-basic-moves-vec [curr-locn]
-   (->> pawn-basic-moves
+   (->> (if (= 1 (first curr-locn)) 
+            pawn-basic-moves 
+            (drop-last pawn-basic-moves))
         (map #(mapv + curr-locn %))
         (take-while empty-square?)
         (mapv #(vector curr-locn %))))
