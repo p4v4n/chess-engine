@@ -58,9 +58,20 @@
     (->> (get-in @board-state [:board i j])
          (#(Character/isLowerCase %))))
 
+(defn white-piece? [[i j]]
+    (->> (get-in @board-state [:board i j])
+         (#(Character/isUpperCase %))))
+
 (defn empty-square? [[i j]]
     (->> (get-in @board-state [:board i j])
          (= \-)))
+
+(defn take-until [pred coll]
+    (lazy-seq
+        (when-let [s (seq coll)]
+            (if (pred (first s))
+                (cons (first s) nil)
+                (cons (first s) (take-until pred (rest s)))))))
 
 (defn knight-moves-vec [curr-locn]
     (->> knight-moves
@@ -81,6 +92,14 @@
         (map #(mapv + curr-locn %))
         (take-while empty-square?)
         (mapv #(vector curr-locn %))))
+
+(defn long-range-moves-single-dirn [curr-locn step]
+    (->> (range 1 8)
+         (map #(mapv (partial * %) step))
+         (map #(map + curr-locn %))
+         (filter inside-the-board?)
+         (take-until white-piece?)
+         (take-while #(not (black-piece? %)))))
 
 ;;Dummy List
 (def engine-valid-move-list ["a7a5" "b7b5" "c7c5" "d7d5" "e7e5" "f7f5" "g7g5" "h7h5"])
