@@ -74,6 +74,8 @@
                 (cons (first s) nil)
                 (cons (first s) (take-until pred (rest s)))))))
 
+;-----Knight---------
+
 (defn knight-moves-vec [curr-locn]
     (->> knight-moves
          (map #(mapv + curr-locn %))
@@ -81,12 +83,16 @@
          (remove black-piece?)
          (mapv #(vector curr-locn %))))
 
+;------King---------
+
 (defn king-basic-moves-vec [curr-locn]
     (->> king-basic-moves
         (map #(mapv + curr-locn %))
         (filter inside-the-board?)
         (remove black-piece?)
         (mapv #(vector curr-locn %))))
+
+;--------Pawn----------
 
 (defn pawn-basic-moves-vec [curr-locn]
    (->> pawn-basic-moves
@@ -100,6 +106,12 @@
          (filter inside-the-board?)
          (filter white-piece?)
          (mapv #(vector curr-locn %))))
+
+(defn pawn-moves-vec [curr-locn]
+    (concat (pawn-basic-moves-vec curr-locn)
+            (pawn-capture-moves-vec curr-locn)))
+
+;----------Queen+Rook+Bishop---------
 
 (defn long-range-moves-single-dirn [curr-locn step]
     (->> (range 1 8)
