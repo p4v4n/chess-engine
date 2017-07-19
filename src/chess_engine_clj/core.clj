@@ -5,5 +5,4 @@
 (defn -main
   []
   (while true
-  	(engine/game-play))
-  )
+  	(engine/game-play)))
