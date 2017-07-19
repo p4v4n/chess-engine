@@ -55,11 +55,11 @@
 (defn inside-the-board? [[i j]]
     (and (<= 0 i 7) (<= 0 j 7)))
 
-(defn black-piece? [[i j]]
+(defn is-black-piece? [[i j]]
     (->> (get-in @board-state [:board i j])
          (#(Character/isLowerCase %))))
 
-(defn white-piece? [[i j]]
+(defn is-white-piece? [[i j]]
     (->> (get-in @board-state [:board i j])
          (#(Character/isUpperCase %))))
 
@@ -90,7 +90,7 @@
     (->> knight-moves
          (map #(mapv + curr-locn %))
          (filter inside-the-board?)
-         (remove black-piece?)
+         (remove is-black-piece?)
          (mapv #(vector curr-locn %))))
 
 ;------King---------
@@ -99,7 +99,7 @@
     (->> king-basic-moves
         (map #(mapv + curr-locn %))
         (filter inside-the-board?)
-        (remove black-piece?)
+        (remove is-black-piece?)
         (mapv #(vector curr-locn %))))
 
 ;--------Pawn----------
@@ -116,7 +116,7 @@
     (->> pawn-capture-moves
          (map #(mapv + curr-locn %))
          (filter inside-the-board?)
-         (filter white-piece?)
+         (filter is-white-piece?)
          (mapv #(vector curr-locn %))))
 
 (defn pawn-moves-vec [curr-locn]
@@ -130,8 +130,8 @@
          (map #(mapv (partial * %) step))
          (map #(mapv + curr-locn %))
          (filter inside-the-board?)
-         (take-until white-piece?)
-         (take-while #(not (black-piece? %)))))
+         (take-until is-white-piece?)
+         (take-while #(not (is-black-piece? %)))))
 
 (defn long-range-moves-all-dirn [curr-locn dirn-vec]
     (->> dirn-vec
@@ -199,8 +199,8 @@
 (defn game-play []
     (println "Your Move: ")
     (let [user-move (string/trim (read-line))]
-      (read-move user-move))
+        (read-move user-move))
     (Thread/sleep 2000)
     (let [engine-move (engine-move-pick)]
-      (println (str "My Move: " engine-move "\n"))
-      (read-move engine-move)))
+        (println (str "My Move: " engine-move "\n"))
+        (read-move engine-move)))
