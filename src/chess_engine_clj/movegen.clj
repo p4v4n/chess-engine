@@ -133,9 +133,3 @@
          (mapv #((piece-function-map (get-in board-vec %)) board-vec %))
          (apply concat)
          (mapv id-to-move-str)))
-
-(defn engine-move-pick [board-vec]
-    "Picks a random move from the engine-valid-move-list"
-    (->> (count (engine-valid-move-list board-vec))
-         (rand-int)
-         (get (engine-valid-move-list board-vec))))

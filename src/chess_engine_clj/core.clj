@@ -11,7 +11,9 @@
     (let [user-move (string/trim (read-line))]
         (board/make-move user-move))
     (Thread/sleep 2000)
-    (let [engine-move (movegen/engine-move-pick (:board @board/board-state))]
+    (let [current-board (:board @board/board-state)
+          valid-move-list (movegen/engine-valid-move-list current-board)
+          engine-move (search/pick-best-move current-board valid-move-list eval/eval-position)]
         (println (str "My Move: " engine-move "\n"))
         (board/make-move engine-move)))
 
