@@ -36,8 +36,6 @@
          (string/join "\n")
          (#(str % "\n a b c d e f g h\n\n"))))
 
-(println (pretty-print))
-
 ;;---------------Game Play---------------
 
 (defn parse-square [square-id]
@@ -47,19 +45,20 @@
                    (reduce -))]
         [(- 8 rank) fil]))
 
-(defn make-move [first-id second-id]
-    (let [[i1 j1] first-id
-          [i2 j2] second-id
-          moving-piece (get-in @board-state [:board i1 j1])]
-          (swap! board-state assoc-in [:board i1 j1] \-)
-          (swap! board-state assoc-in [:board i2 j2] moving-piece))
-    (println (pretty-print)))
+(defn make-move [board-pos [first-id second-id]]
+    (let [moving-piece (get-in board-pos first-id)]
+        (-> board-pos
+            (assoc-in first-id \-)
+            (assoc-in second-id moving-piece))))
 
 (defn read-move [move]
-    (let [[full-move s1 s2] (re-find #"^([a-h][1-8])([a-h][1-8])$" move)]
-        (make-move (parse-square s1) (parse-square s2))))
+    (let [[full-move s1 s2] (re-find #"^([a-h][1-8])([a-h][1-8])$" move)
+          next-pos (make-move (:board @board-state) [(parse-square s1) (parse-square s2)])]
+      (swap! board-state assoc :board next-pos)
+      (println (pretty-print))))
 
 (defn game-play []
+    (println (pretty-print))
     (println "Your Move: ")
     (let [user-move (string/trim (read-line))]
         (read-move user-move))
