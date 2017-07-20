@@ -1,6 +1,5 @@
-(ns chess-engine-clj.engine
-    (:require [clojure.string :as string]
-              [chess-engine-clj.movegen :as movegen]))
+(ns chess-engine-clj.board
+    (:require [clojure.string :as string]))
 
 (def initial-board [[\r \n \b \q \k \b \n \r]
                     [\p \p \p \p \p \p \p \p]
@@ -37,7 +36,8 @@
          (#(str % "\n a b c d e f g h\n\n"))))
 
 (println (pretty-print))
-;;---------------Game Play---------------
+
+;;---------------Game Play Helpers---------------
 
 (defn parse-square [square-id]
     (let [[fil-id rank] [(subs square-id 0 1) (Integer/parseInt (subs square-id 1))]
@@ -62,11 +62,3 @@
       (swap! board-state assoc :board next-pos)
       (println (pretty-print))))
 
-(defn game-play []
-    (println "Your Move: ")
-    (let [user-move (string/trim (read-line))]
-        (make-move user-move))
-    (Thread/sleep 2000)
-    (let [engine-move (movegen/engine-move-pick (:board @board-state))]
-        (println (str "My Move: " engine-move "\n"))
-        (make-move engine-move)))
