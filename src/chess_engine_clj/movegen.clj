@@ -1,22 +1,5 @@
 (ns chess-engine-clj.movegen)
 
-(def initial-board [[\r \n \b \q \k \b \n \r]
-                    [\p \p \p \p \p \p \p \p]
-                    [\- \- \- \- \- \- \- \-]
-                    [\- \- \- \- \- \- \- \-]
-                    [\- \- \- \- \- \- \- \-]
-                    [\- \- \- \- \- \- \- \-]
-                    [\P \P \P \P \P \P \P \P]
-                    [\R \N \B \Q \K \B \N \R]])
-
-(def board-state (atom {:board initial-board
-                        :turn "white"
-                        :moves-cnt 0
-                        :white-can-castle-ks true
-                        :white-can-castle-qs true
-                        :black-can-castle-ks true
-                        :black-can-castle-qs true}))
-
 ;;-----Generating Moves ----------
 
 ;------Directions----------
@@ -42,10 +25,10 @@
 (def queen-moves all-directions)
 
 
-(defn black-piece-location []
+(defn black-piece-location [board-vec]
   "Returns the indices for location of black pieces"
   (filter (comp #(Character/isLowerCase %)
-                #(get-in (:board @board-state) %))
+                #(get-in board-vec %))
            (for [x (range 8)
                  y (range 8)]
                 [x y])))
@@ -53,16 +36,16 @@
 (defn inside-the-board? [[i j]]
     (and (<= 0 i 7) (<= 0 j 7)))
 
-(defn is-black-piece? [[i j]]
-    (->> (get-in @board-state [:board i j])
+(defn is-black-piece? [board-vec [i j]]
+    (->> (get-in board-vec [i j])
          (#(Character/isLowerCase %))))
 
-(defn is-white-piece? [[i j]]
-    (->> (get-in @board-state [:board i j])
+(defn is-white-piece? [board-vec [i j]]
+    (->> (get-in board-vec [i j])
          (#(Character/isUpperCase %))))
 
-(defn empty-square? [[i j]]
-    (->> (get-in @board-state [:board i j])
+(defn empty-square? [board-vec [i j]]
+    (->> (get-in board-vec [i j])
          (= \-)))
 
 (defn take-until [pred coll]
@@ -84,77 +67,76 @@
 
 ;-----Knight---------
 
-(defn knight-moves-vec [curr-locn]
+(defn knight-moves-vec [board-vec curr-locn]
     (->> knight-moves
          (map #(mapv + curr-locn %))
          (filter inside-the-board?)
-         (remove is-black-piece?)
+         (remove #(is-black-piece? board-vec %))
          (mapv #(vector curr-locn %))))
 
 ;------King---------
 
-(defn king-basic-moves-vec [curr-locn]
+(defn king-basic-moves-vec [board-vec curr-locn]
     (->> king-basic-moves
         (map #(mapv + curr-locn %))
         (filter inside-the-board?)
-        (remove is-black-piece?)
+        (remove #(is-black-piece? board-vec %))
         (mapv #(vector curr-locn %))))
 
 ;--------Pawn----------
 
-(defn pawn-basic-moves-vec [curr-locn]
+(defn pawn-basic-moves-vec [board-vec curr-locn]
    (->> (if (= 1 (first curr-locn)) 
             pawn-basic-moves 
             (drop-last pawn-basic-moves))
         (map #(mapv + curr-locn %))
-        (take-while empty-square?)
+        (take-while #(empty-square? board-vec %))
         (mapv #(vector curr-locn %))))
 
-(defn pawn-capture-moves-vec [curr-locn]
+(defn pawn-capture-moves-vec [board-vec curr-locn]
     (->> pawn-capture-moves
          (map #(mapv + curr-locn %))
          (filter inside-the-board?)
-         (filter is-white-piece?)
+         (filter #(is-white-piece? board-vec %))
          (mapv #(vector curr-locn %))))
 
-(defn pawn-moves-vec [curr-locn]
-    (concat (pawn-basic-moves-vec curr-locn)
-            (pawn-capture-moves-vec curr-locn)))
+(defn pawn-moves-vec [board-vec curr-locn]
+    (concat (pawn-basic-moves-vec board-vec curr-locn)
+            (pawn-capture-moves-vec board-vec curr-locn)))
 
 ;----------Queen+Rook+Bishop---------
 
-(defn long-range-moves-single-dirn [curr-locn step]
+(defn long-range-moves-single-dirn [board-vec curr-locn step]
     (->> (range 1 8)
          (map #(mapv (partial * %) step))
          (map #(mapv + curr-locn %))
          (filter inside-the-board?)
-         (take-until is-white-piece?)
-         (take-while #(not (is-black-piece? %)))))
+         (take-until #(is-white-piece? board-vec %))
+         (take-while #(not (is-black-piece? board-vec %)))))
 
-(defn long-range-moves-all-dirn [curr-locn dirn-vec]
+(defn long-range-moves-all-dirn [board-vec curr-locn dirn-vec]
     (->> dirn-vec
-         (map #(long-range-moves-single-dirn curr-locn %))
+         (map #(long-range-moves-single-dirn board-vec curr-locn %))
          (apply concat)
          (mapv #(vector curr-locn %))))
 
-(def queen-moves-vec #(long-range-moves-all-dirn % all-directions))
-(def rook-moves-vec #(long-range-moves-all-dirn % rook-directions))
-(def bishop-moves-vec #(long-range-moves-all-dirn % bishop-directions))
+(def queen-moves-vec #(long-range-moves-all-dirn %1 %2 all-directions))
+(def rook-moves-vec #(long-range-moves-all-dirn %1 %2 rook-directions))
+(def bishop-moves-vec #(long-range-moves-all-dirn %1 %2 bishop-directions))
 
 ;---------
 
 (def piece-function-map {\n knight-moves-vec \k king-basic-moves-vec \p pawn-moves-vec
                          \q queen-moves-vec \r rook-moves-vec \b bishop-moves-vec})
 
-(defn engine-valid-move-list []
-    (->> (black-piece-location)
-         (mapv #((piece-function-map (get-in (:board @board-state) %)) %))
+(defn engine-valid-move-list [board-vec]
+    (->> (black-piece-location board-vec)
+         (mapv #((piece-function-map (get-in board-vec %)) board-vec %))
          (apply concat)
          (mapv id-to-move-str)))
 
 (defn engine-move-pick [board-vec]
     "Picks a random move from the engine-valid-move-list"
-    (swap! board-state assoc-in [:board] board-vec)
-    (->> (count (engine-valid-move-list))
+    (->> (count (engine-valid-move-list board-vec))
          (rand-int)
-         (get (engine-valid-move-list))))
+         (get (engine-valid-move-list board-vec))))
