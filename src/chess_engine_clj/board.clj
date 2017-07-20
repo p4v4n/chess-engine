@@ -50,15 +50,15 @@
   (let [[full-move s1 s2] (re-find #"^([a-h][1-8])([a-h][1-8])$" move-str)]
     (vector (parse-square s1) (parse-square s2))))
 
-(defn board-pos-after-move [board-pos [first-id second-id]]
-    (let [moving-piece (get-in board-pos first-id)]
+(defn board-pos-after-move [board-pos move-str]
+    (let [[first-id second-id] (parse-movestr move-str)
+          moving-piece (get-in board-pos first-id)]
         (-> board-pos
             (assoc-in first-id \-)
             (assoc-in second-id moving-piece))))
 
 (defn make-move [move-str]
-    (let [move-id (parse-movestr move-str)
-          next-pos (board-pos-after-move (:board @board-state) move-id)]
+    (let [next-pos (board-pos-after-move (:board @board-state) move-str)]
       (swap! board-state assoc :board next-pos)
       (println (pretty-print))))
 

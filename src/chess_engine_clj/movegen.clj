@@ -18,7 +18,6 @@
 (def all-directions (concat rook-directions bishop-directions))
 (def knight-moves [[-2 -1] [-1 -2] [+1 -2] [+2 -1]
                    [-2 +1] [-1 +2] [+1 +2] [+2 +1]])
-
 (def king-basic-moves all-directions)
 (def pawn-basic-moves [[+1 0] [+2 0]])
 (def pawn-capture-moves [[+1 +1] [+1 -1]])
