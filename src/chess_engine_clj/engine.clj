@@ -36,6 +36,7 @@
          (string/join "\n")
          (#(str % "\n a b c d e f g h\n\n"))))
 
+(println (pretty-print))
 ;;---------------Game Play---------------
 
 (defn parse-square [square-id]
@@ -45,24 +46,27 @@
                    (reduce -))]
         [(- 8 rank) fil]))
 
-(defn make-move [board-pos [first-id second-id]]
+(defn parse-movestr [move-str]
+  (let [[full-move s1 s2] (re-find #"^([a-h][1-8])([a-h][1-8])$" move-str)]
+    (vector (parse-square s1) (parse-square s2))))
+
+(defn board-pos-after-move [board-pos [first-id second-id]]
     (let [moving-piece (get-in board-pos first-id)]
         (-> board-pos
             (assoc-in first-id \-)
             (assoc-in second-id moving-piece))))
 
-(defn read-move [move]
-    (let [[full-move s1 s2] (re-find #"^([a-h][1-8])([a-h][1-8])$" move)
-          next-pos (make-move (:board @board-state) [(parse-square s1) (parse-square s2)])]
+(defn make-move [move-str]
+    (let [move-id (parse-movestr move-str)
+          next-pos (board-pos-after-move (:board @board-state) move-id)]
       (swap! board-state assoc :board next-pos)
       (println (pretty-print))))
 
 (defn game-play []
-    (println (pretty-print))
     (println "Your Move: ")
     (let [user-move (string/trim (read-line))]
-        (read-move user-move))
+        (make-move user-move))
     (Thread/sleep 2000)
     (let [engine-move (movegen/engine-move-pick (:board @board-state))]
         (println (str "My Move: " engine-move "\n"))
-        (read-move engine-move)))
+        (make-move engine-move)))
