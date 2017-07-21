@@ -53,6 +53,9 @@
   (let [[full-move s1 s2] (re-find #"^([a-h][1-8])([a-h][1-8])$" move-str)]
     (vector (parse-square s1) (parse-square s2))))
 
+(defn is-valid-move? [move-str]
+  (re-find #"^([a-h][1-8])([a-h][1-8])$" move-str))
+
 (defn board-pos-after-move [board-pos move-str]
     (let [[first-id second-id] (parse-movestr move-str)
           moving-piece (get-in board-pos first-id)]
@@ -75,4 +78,4 @@
         (do (swap! board-state assoc :game-state :black-won)
             (println "Checkmate!"))
         (do (swap! board-state assoc :game-state :white-won)
-            (println "You Win"))))
+            (println "You Won"))))
