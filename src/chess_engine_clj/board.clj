@@ -59,6 +59,6 @@
 
 (defn make-move [move-str]
     (let [next-pos (board-pos-after-move (:board @board-state) move-str)]
-      (swap! board-state assoc :board next-pos)
-      (println (pretty-print))))
+        (swap! board-state assoc :board next-pos)
+        (println (pretty-print))))
 
