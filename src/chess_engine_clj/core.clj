@@ -25,5 +25,6 @@
     ((player-to-move-fn (:turn @board/board-state))))
 
 (defn -main []
-    (while true
-        (game-play)))
+    (while (board/both-kings-alive?)
+        (game-play))
+    (board/end-of-game-action))

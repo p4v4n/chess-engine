@@ -15,6 +15,7 @@
                         :turn "white"
                         :moves-cnt 0
                         :eval 0
+                        :game-state :in-progress
                         :white-can-castle-ks true
                         :white-can-castle-qs true
                         :black-can-castle-ks true
@@ -65,3 +66,13 @@
         (swap! board-state assoc :turn ({"white" "black" "black" "white"} (:turn @board-state)))
         (swap! board-state assoc :eval (eval/eval-position next-pos))
         (println (pretty-print))))
+
+(defn both-kings-alive? []
+    (< -500 (:eval @board-state) 500))
+
+(defn end-of-game-action []
+    (if (> (:eval @board-state) 0)
+        (do (swap! board-state assoc :game-state :black-won)
+            (println "Checkmate!"))
+        (do (swap! board-state assoc :game-state :white-won)
+            (println "You Win"))))
