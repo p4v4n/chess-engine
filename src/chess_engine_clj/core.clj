@@ -9,7 +9,9 @@
 (defn white-move []
   (println "Your Move: ")
     (let [user-move (string/trim (read-line))]
-        (board/make-move user-move)))
+        (if (board/is-valid-move? user-move)
+            (board/make-move user-move)
+            (println "Please enter a valid move like b1c3"))))
 
 (defn black-move []
     (let [current-board (:board @board/board-state)
