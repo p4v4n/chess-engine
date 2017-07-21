@@ -60,5 +60,5 @@
 (defn make-move [move-str]
     (let [next-pos (board-pos-after-move (:board @board-state) move-str)]
         (swap! board-state assoc :board next-pos)
+        (swap! board-state assoc :turn ({"white" "black" "black" "white"} (:turn @board-state)))
         (println (pretty-print))))
-
