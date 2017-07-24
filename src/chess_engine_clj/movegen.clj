@@ -19,8 +19,8 @@
 (def knight-moves [[-2 -1] [-1 -2] [+1 -2] [+2 -1]
                    [-2 +1] [-1 +2] [+1 +2] [+2 +1]])
 (def king-basic-moves all-directions)
-(def pawn-basic-moves [[+1 0] [+2 0]])
-(def pawn-capture-moves [[+1 +1] [+1 -1]])
+(def pawn-basic-moves {:white [[-1 0] [-2 0]] :black [[+1 0] [+2 0]]})
+(def pawn-capture-moves {:white [[-1 +1] [-1 -1]] :black [[+1 +1] [+1 -1]]})
 (def queen-moves all-directions)
 
 
@@ -101,15 +101,15 @@
 ;--------Pawn----------
 
 (defn pawn-basic-moves-vec [board-vec color curr-locn]
-   (->> (if (= 1 (first curr-locn)) 
-            pawn-basic-moves 
-            (drop-last pawn-basic-moves))
+   (->> (if (= (if (= color :white) 6 1) (first curr-locn)) 
+            (pawn-basic-moves color)
+            (drop-last (pawn-basic-moves color)))
         (map #(mapv + curr-locn %))
         (take-while #(empty-square? board-vec %))
         (mapv #(vector curr-locn %))))
 
 (defn pawn-capture-moves-vec [board-vec color curr-locn]
-    (->> pawn-capture-moves
+    (->> (pawn-capture-moves color)
          (map #(mapv + curr-locn %))
          (filter inside-the-board?)
          (filter #((is-enemy-piece? color) board-vec %))

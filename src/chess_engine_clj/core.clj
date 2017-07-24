@@ -19,7 +19,7 @@
           valid-move-list (movegen/valid-move-list current-board (keyword color))
           engine-choice (search/pick-best-move current-board color valid-move-list eval/eval-position2)]
         (Thread/sleep 1000)
-        (println (str "Engine Move for " color " : " engine-move "\n"))
+        (println (str "Engine Move for " color " : " engine-choice "\n"))
         (board/make-move engine-choice)))
 
 (def player-to-move-fn {"user" user-move "engine" engine-move})
