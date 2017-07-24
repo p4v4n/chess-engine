@@ -7,5 +7,5 @@
        (map eval-function)
        (map vector valid-move-list)
        (sort-by second)
-       last
+       first
        first))

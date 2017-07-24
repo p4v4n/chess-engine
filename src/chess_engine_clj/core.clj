@@ -16,7 +16,7 @@
 (defn black-move []
     (let [current-board (:board @board/board-state)
           valid-move-list (movegen/engine-valid-move-list current-board)
-          engine-move (search/pick-best-move current-board valid-move-list eval/eval-position)]
+          engine-move (search/pick-best-move current-board valid-move-list eval/eval-position2)]
         (Thread/sleep 1000)
         (println (str "My Move: " engine-move "\n"))
         (board/make-move engine-move)))

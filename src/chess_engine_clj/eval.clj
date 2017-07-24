@@ -1,6 +1,8 @@
 (ns chess-engine-clj.eval)
 
 ;;Evaluation from white-side
+;;------
+;;basic evaluation function
 
 (def piece-value {\p -1 \n -3 \b -3 \r -5 \q -9 \k -1000
 	              \P 1 \N 3 \B 3 \R 5 \Q 9 \K 1000 \- 0})
@@ -12,6 +14,7 @@
 
 ;-----
 ;;;  Tomasz Michniewski's  Simplified evaluation function
+
 (def piece-value2 {\K  20000 \Q   900  \R  500
                   \B  300 \N  300  \P  100
                   \k -20000 \q  -900  \r -500
@@ -79,3 +82,18 @@
     [ 20  20   0   0   0   0  20  20 ]
     [ 20  30  10   0   0  10  30  20 ]]})
 
+
+(defn piece-contribution [[location-ind piece-type]]
+  (cond
+    (= piece-type \-) 0
+    (Character/isUpperCase piece-type) (+ (piece-value2 piece-type) 
+                                          (get-in (white-bonus-eval-tables piece-type) location-ind))
+    :else (- (piece-value2 piece-type) 
+             (get-in (white-bonus-eval-tables ((comp first seq clojure.string/upper-case) piece-type))
+                     (mapv - [7 7] location-ind)))))
+
+(defn eval-position2 [board-vec]
+  (->> (flatten board-vec)
+       (map vector (for [x (range 8) y (range 8)] [x y]))
+       (map piece-contribution)
+       (reduce +)))
