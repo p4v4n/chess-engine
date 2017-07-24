@@ -1,6 +1,6 @@
 (ns chess-engine-clj.board
     (:require [clojure.string :as string]
-              [chess-engine-clj.eval :as eval]))
+              [chess-engine-clj.evaluation :as evaluation]))
 
 (def initial-board [[\r \n \b \q \k \b \n \r]
                     [\p \p \p \p \p \p \p \p]
@@ -67,7 +67,7 @@
     (let [next-pos (board-pos-after-move (:board @board-state) move-str)]
         (swap! board-state assoc :board next-pos)
         (swap! board-state assoc :turn ({"white" "black" "black" "white"} (:turn @board-state)))
-        (swap! board-state assoc :eval (eval/eval-position next-pos))
+        (swap! board-state assoc :eval (evaluation/eval-position next-pos))
         (println (pretty-print))))
 
 (defn both-kings-alive? []

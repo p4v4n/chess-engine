@@ -1,4 +1,4 @@
-(ns chess-engine-clj.eval)
+(ns chess-engine-clj.evaluation)
 
 ;;Evaluation from white-side
 ;;------
