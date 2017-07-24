@@ -8,11 +8,15 @@
 
 (defn user-move [color]
   (println "User Move: ")
-    (let [user-choice (string/trim (read-line))]
-        (if (board/is-valid-move? user-choice)
+    (let [user-choice (string/trim (read-line))
+          current-board (:board @board/board-state)
+          valid-move-list (movegen/valid-move-list current-board (keyword color))]
+        (if (and (board/is-valid-move? user-choice)
+                 (contains? (set valid-move-list) user-choice))
             (do (println (str "User Move for " color " : " user-choice "\n"))
                 (board/make-move user-choice))          
-            (println "Please enter a valid move like b1c3"))))
+            (do (println "Please enter a valid move like b1c3")
+                (user-move color)))))
 
 (defn engine-move [color]
     (let [current-board (:board @board/board-state)
