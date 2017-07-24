@@ -49,6 +49,16 @@
     (->> (get-in board-vec [i j])
          (#(Character/isUpperCase %))))
 
+(defn is-friendly-piece? [color]
+  (case color
+    :white is-white-piece?
+    :black is-black-piece?))
+
+(defn is-enemy-piece? [color]
+  (case color
+    :white is-black-piece?
+    :black is-white-piece?))
+
 (defn empty-square? [board-vec [i j]]
     (->> (get-in board-vec [i j])
          (= \-)))
@@ -72,25 +82,25 @@
 
 ;-----Knight---------
 
-(defn knight-moves-vec [board-vec curr-locn]
+(defn knight-moves-vec [board-vec color curr-locn]
     (->> knight-moves
          (map #(mapv + curr-locn %))
          (filter inside-the-board?)
-         (remove #(is-black-piece? board-vec %))
+         (remove #((is-friendly-piece? color) board-vec %))
          (mapv #(vector curr-locn %))))
 
 ;------King---------
 
-(defn king-basic-moves-vec [board-vec curr-locn]
+(defn king-basic-moves-vec [board-vec color curr-locn]
     (->> king-basic-moves
         (map #(mapv + curr-locn %))
         (filter inside-the-board?)
-        (remove #(is-black-piece? board-vec %))
+        (remove #((is-friendly-piece? color) board-vec %))
         (mapv #(vector curr-locn %))))
 
 ;--------Pawn----------
 
-(defn pawn-basic-moves-vec [board-vec curr-locn]
+(defn pawn-basic-moves-vec [board-vec color curr-locn]
    (->> (if (= 1 (first curr-locn)) 
             pawn-basic-moves 
             (drop-last pawn-basic-moves))
@@ -98,44 +108,49 @@
         (take-while #(empty-square? board-vec %))
         (mapv #(vector curr-locn %))))
 
-(defn pawn-capture-moves-vec [board-vec curr-locn]
+(defn pawn-capture-moves-vec [board-vec color curr-locn]
     (->> pawn-capture-moves
          (map #(mapv + curr-locn %))
          (filter inside-the-board?)
-         (filter #(is-white-piece? board-vec %))
+         (filter #((is-enemy-piece? color) board-vec %))
          (mapv #(vector curr-locn %))))
 
-(defn pawn-moves-vec [board-vec curr-locn]
-    (concat (pawn-basic-moves-vec board-vec curr-locn)
-            (pawn-capture-moves-vec board-vec curr-locn)))
+(defn pawn-moves-vec [board-vec color curr-locn]
+    (concat (pawn-basic-moves-vec board-vec color curr-locn)
+            (pawn-capture-moves-vec board-vec color curr-locn)))
 
 ;----------Queen+Rook+Bishop---------
 
-(defn long-range-moves-single-dirn [board-vec curr-locn step]
+(defn long-range-moves-single-dirn [board-vec color curr-locn step]
     (->> (range 1 8)
          (map #(mapv (partial * %) step))
          (map #(mapv + curr-locn %))
          (filter inside-the-board?)
-         (take-until #(is-white-piece? board-vec %))
-         (take-while #(not (is-black-piece? board-vec %)))))
+         (take-until #((is-enemy-piece? color) board-vec %))
+         (take-while #(not ((is-friendly-piece? color) board-vec %)))))
 
-(defn long-range-moves-all-dirn [board-vec curr-locn dirn-vec]
+(defn long-range-moves-all-dirn [board-vec color curr-locn dirn-vec]
     (->> dirn-vec
-         (map #(long-range-moves-single-dirn board-vec curr-locn %))
+         (map #(long-range-moves-single-dirn board-vec color curr-locn %))
          (apply concat)
          (mapv #(vector curr-locn %))))
 
-(def queen-moves-vec #(long-range-moves-all-dirn %1 %2 all-directions))
-(def rook-moves-vec #(long-range-moves-all-dirn %1 %2 rook-directions))
-(def bishop-moves-vec #(long-range-moves-all-dirn %1 %2 bishop-directions))
+(def queen-moves-vec #(long-range-moves-all-dirn %1 %2 %3 all-directions))
+(def rook-moves-vec #(long-range-moves-all-dirn %1 %2 %3 rook-directions))
+(def bishop-moves-vec #(long-range-moves-all-dirn %1 %2 %3 bishop-directions))
 
 ;---------
 
 (def piece-function-map {\n knight-moves-vec \k king-basic-moves-vec \p pawn-moves-vec
                          \q queen-moves-vec \r rook-moves-vec \b bishop-moves-vec})
 
-(defn black-valid-move-list [board-vec]
-    (->> (black-piece-location board-vec)
-         (mapv #((piece-function-map (get-in board-vec %)) board-vec %))
+(defn piece-location-fn [color]
+  (case color
+    :white white-piece-location
+    :black black-piece-location))
+
+(defn valid-move-list [board-vec color]
+    (->> ((piece-location-fn color) board-vec)
+         (mapv #((piece-function-map (get-in board-vec %)) board-vec color %))
          (apply concat)
          (mapv id-to-move-str)))
