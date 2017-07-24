@@ -25,8 +25,14 @@
 
 
 (defn black-piece-location [board-vec]
-  "Returns the indices for location of black pieces"
   (filter (comp #(Character/isLowerCase %)
+                #(get-in board-vec %))
+           (for [x (range 8)
+                 y (range 8)]
+                [x y])))
+
+(defn white-piece-location [board-vec]
+  (filter (comp #(Character/isUpperCase %)
                 #(get-in board-vec %))
            (for [x (range 8)
                  y (range 8)]
@@ -128,7 +134,7 @@
 (def piece-function-map {\n knight-moves-vec \k king-basic-moves-vec \p pawn-moves-vec
                          \q queen-moves-vec \r rook-moves-vec \b bishop-moves-vec})
 
-(defn engine-valid-move-list [board-vec]
+(defn black-valid-move-list [board-vec]
     (->> (black-piece-location board-vec)
          (mapv #((piece-function-map (get-in board-vec %)) board-vec %))
          (apply concat)
