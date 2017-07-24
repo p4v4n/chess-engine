@@ -142,7 +142,9 @@
 ;---------
 
 (def piece-function-map {\n knight-moves-vec \k king-basic-moves-vec \p pawn-moves-vec
-                         \q queen-moves-vec \r rook-moves-vec \b bishop-moves-vec})
+                         \q queen-moves-vec \r rook-moves-vec \b bishop-moves-vec
+                         \N knight-moves-vec \K king-basic-moves-vec \P pawn-moves-vec
+                         \Q queen-moves-vec \R rook-moves-vec \B bishop-moves-vec})
 
 (defn piece-location-fn [color]
   (case color

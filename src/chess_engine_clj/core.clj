@@ -6,27 +6,29 @@
               [chess-engine-clj.search :as search])
   (:gen-class))
 
-(defn white-move []
-  (println "Your Move: ")
-    (let [user-move (string/trim (read-line))]
-        (if (board/is-valid-move? user-move)
-            (board/make-move user-move)
+(defn user-move [color]
+  (println "User Move: ")
+    (let [user-choice (string/trim (read-line))]
+        (if (board/is-valid-move? user-choice)
+            (do (println (str "User Move for " color " : " user-choice "\n"))
+                (board/make-move user-choice))          
             (println "Please enter a valid move like b1c3"))))
 
-(defn black-move []
+(defn engine-move [color]
     (let [current-board (:board @board/board-state)
-          valid-move-list (movegen/black-valid-move-list current-board)
-          engine-move (search/pick-best-move current-board valid-move-list eval/eval-position2)]
+          valid-move-list (movegen/valid-move-list current-board (keyword color))
+          engine-choice (search/pick-best-move current-board color valid-move-list eval/eval-position2)]
         (Thread/sleep 1000)
-        (println (str "My Move: " engine-move "\n"))
-        (board/make-move engine-move)))
+        (println (str "Engine Move for " color " : " engine-move "\n"))
+        (board/make-move engine-choice)))
 
-(def player-to-move-fn {"white" white-move "black" black-move})
+(def player-to-move-fn {"user" user-move "engine" engine-move})
 
-(defn game-play []
-    ((player-to-move-fn (:turn @board/board-state))))
+(defn game-play [player]
+    ((player-to-move-fn player) (:turn @board/board-state)))
 
-(defn -main []
+(defn -main [player1 player2]
     (while (board/both-kings-alive?)
-        (game-play))
+        (game-play player1)
+        (game-play player2))
     (board/end-of-game-action))

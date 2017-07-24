@@ -1,11 +1,11 @@
 (ns chess-engine-clj.search
   (:require [chess-engine-clj.board :as board]))
 
-(defn pick-best-move [current-board valid-move-list eval-function]
+(defn pick-best-move [current-board color valid-move-list eval-function]
   (->> valid-move-list
        (map #(board/board-pos-after-move current-board %))
        (map eval-function)
        (map vector valid-move-list)
        (sort-by second)
-       first
+       ((if (= color "white") last first))
        first))
