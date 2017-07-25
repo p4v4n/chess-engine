@@ -21,8 +21,7 @@
 (defn engine-move [color]
     (let [current-board (:board @board/board-state)
           valid-move-list (movegen/valid-move-list current-board (keyword color))
-          engine-choice (search/pick-best-move current-board color valid-move-list evaluation/eval-position2)]
-        (Thread/sleep 1000)
+          engine-choice (search/pick-best-move current-board color search/evaluation-at-depth 3)]
         (println (str "Engine Move for " color " : " engine-choice "\n"))
         (board/make-move engine-choice)))
 
