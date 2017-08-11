@@ -11,7 +11,7 @@
                     [\P \P \P \P \P \P \P \P]
                     [\R \N \B \Q \K \B \N \R]])
 
-(def board-state (atom {:board initial-board
+(def initial-board-state (atom {:board initial-board
                         :turn "white"
                         :moves-cnt 0
                         :eval 0
@@ -31,14 +31,12 @@
          (map #(str % " "))
          string/join))
 
-(defn pretty-print []
-    (->> (:board @board-state)
+(defn pretty-print [board-state]
+    (->> (:board board-state)
          (map line-convert)
          (map #(str (- 8 %1) %2) (range 8))
          (string/join "\n")
          (#(str % "\n a b c d e f g h\n\n"))))
-
-(println (pretty-print))
 
 ;;---------------Game Play Helpers---------------
 
@@ -63,19 +61,17 @@
             (assoc-in first-id \-)
             (assoc-in second-id moving-piece))))
 
-(defn make-move [move-str]
-    (let [next-pos (board-pos-after-move (:board @board-state) move-str)]
-        (swap! board-state assoc :board next-pos)
-        (swap! board-state assoc :turn ({"white" "black" "black" "white"} (:turn @board-state)))
-        (swap! board-state assoc :eval (evaluation/eval-position next-pos))
-        (println (pretty-print))))
+(defn make-move [board-state move-str]
+    (let [next-pos (board-pos-after-move (:board board-state) move-str)]
+        (-> board-state
+        (assoc :board next-pos)
+        (assoc :turn ({"white" "black" "black" "white"} (:turn board-state)))
+        (assoc :eval (evaluation/eval-position next-pos)))))
 
-(defn both-kings-alive? []
-    (< -500 (:eval @board-state) 500))
+(defn both-kings-alive? [board-state]
+    (< -500 (:eval board-state) 500))
 
-(defn end-of-game-action []
-    (if (> (:eval @board-state) 0)
-        (do (swap! board-state assoc :game-state :black-won)
-            (println "Checkmate!"))
-        (do (swap! board-state assoc :game-state :white-won)
-            (println "You Won"))))
+(defn end-of-game-action [board-state]
+    (if (> (:eval board-state) 0)
+            (println "White Won")
+            (println "Black Won")))

@@ -14,10 +14,11 @@
              (apply (if (= color-to-max :white) max min))))))
 
 (defn pick-best-move [current-board color eval-function depth]
-  (->> (movegen/valid-move-list current-board (keyword color))
+  (let [valid-move-list (movegen/valid-move-list current-board (keyword color))]
+  (->> valid-move-list
        (map #(board/board-pos-after-move current-board %))
-       (map #(eval-function % (dec depth) ({:white :black :black :white} (keyword color))))
-       (map vector (movegen/valid-move-list current-board (keyword color)))
+       (pmap #(eval-function % (dec depth) ({:white :black :black :white} (keyword color))))
+       (map vector valid-move-list)
        (sort-by second)
        ((if (= color "white") last first))
-       first))
+       first)))
