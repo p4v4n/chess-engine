@@ -67,11 +67,11 @@
         (-> board-state
         (assoc :board next-pos)
         (assoc :turn ({"white" "black" "black" "white"} (:turn board-state)))
-        (assoc :eval (evaluation/eval-position next-pos))
+        (assoc :eval (evaluation/eval-position2 next-pos))
         (update-in [:game-pgn] conj move-str))))
 
 (defn both-kings-alive? [board-state]
-    (< -500 (:eval board-state) 500))
+    (< -10000 (:eval board-state) 10000))
 
 (defn readable-game-score [board-state]
   (->> (:game-pgn board-state)

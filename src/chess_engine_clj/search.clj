@@ -15,7 +15,7 @@
 
 ;;With alpha-beta pruning
 (defn alpha-beta [current-board depth alpha beta color-to-max]
-  (if (zero? depth)
+  (if (or (zero? depth) (not (< -10000 (evaluation/eval-position2 current-board) 10000)))
       (evaluation/eval-position2 current-board)
       (let [valid-move-list (movegen/valid-move-list current-board color-to-max)]
         (if (= color-to-max :white)
@@ -38,10 +38,10 @@
 
 (defn pick-best-move [current-board color depth]
   (let [valid-move-list (movegen/valid-move-list current-board (keyword color))]
-  (->> valid-move-list
-       (pmap #(board/board-pos-after-move current-board %))
-       (pmap #(alpha-beta % (dec depth) -10000 10000 ({:white :black :black :white} (keyword color))))
-       (map vector valid-move-list)
-       (sort-by second)
-       ((if (= color "white") last first))
-       first)))
+    (->> valid-move-list
+         (pmap #(board/board-pos-after-move current-board %))
+         (pmap #(alpha-beta % (dec depth) -100000 100000 ({:white :black :black :white} (keyword color))))
+         (map vector valid-move-list)
+         (sort-by second)
+         ((if (= color "white") last first))
+         first)))
