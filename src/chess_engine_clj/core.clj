@@ -33,7 +33,7 @@
     ((player-to-move-fn player) board-state))
 
 (defn -main [player1 player2]
-  (loop [curr-board-state @board/initial-board-state curr-player player1]
+  (loop [curr-board-state board/initial-board-state curr-player player1]
     (println (board/pretty-print curr-board-state))
     (if (not (board/both-kings-alive? curr-board-state))
         (board/end-of-game-action curr-board-state)

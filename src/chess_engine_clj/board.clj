@@ -11,16 +11,16 @@
                     [\P \P \P \P \P \P \P \P]
                     [\R \N \B \Q \K \B \N \R]])
 
-(def initial-board-state (atom {:board initial-board
-                                :turn "white"
-                                :moves-cnt 0
-                                :eval 0
-                                :game-state :in-progress
-                                :game-pgn []
-                                :white-can-castle-ks true
-                                :white-can-castle-qs true
-                                :black-can-castle-ks true
-                                :black-can-castle-qs true}))
+(def initial-board-state {:board initial-board
+                          :turn "white"
+                          :moves-cnt 0
+                          :eval 0
+                          :game-state :in-progress
+                          :game-pgn []
+                          :white-can-castle-ks true
+                          :white-can-castle-qs true
+                          :black-can-castle-ks true
+                          :black-can-castle-qs true})
 
 (def uni-pieces {\R "♜", \N "♞", \B "♝", \Q "♛", \K "♚", \P "♟",
                  \r "♖", \n "♘", \b "♗", \q "♕", \k "♔", \p "♙", \- "·"})
@@ -81,9 +81,26 @@
                   (map #(str (first %) "." (second %)))
                   (string/join " ")))
 
+(defn replay-game [board-state]
+  (let [move-li (:game-pgn board-state)]
+    (loop [moves move-li curr-board initial-board turn "white" move-no 1]
+      (if (empty? moves)
+          (println "---------")
+          (let [next-board (board-pos-after-move curr-board (first moves))]
+            (println move-no turn "moves:" (first moves) "\n")
+            (println (pretty-print {:board next-board}))
+            (Thread/sleep 1000)
+            (if (= turn "white")
+                (recur (rest moves) next-board "black" move-no)
+                (recur (rest moves) next-board "white" (inc move-no))))))))
+
 (defn end-of-game-action [board-state]
     (if (> (:eval board-state) 0)
             (println "White Won")
             (println "Black Won"))
     (println "Game-Score:") 
-    (println (readable-game-score board-state)))
+    (println (readable-game-score board-state))
+    (println "Want to replay the game?(y/n)")
+    (let [reply (read-line)]
+      (if (= reply "y")
+          (replay-game board-state))))
