@@ -12,14 +12,15 @@
                     [\R \N \B \Q \K \B \N \R]])
 
 (def initial-board-state (atom {:board initial-board
-                        :turn "white"
-                        :moves-cnt 0
-                        :eval 0
-                        :game-state :in-progress
-                        :white-can-castle-ks true
-                        :white-can-castle-qs true
-                        :black-can-castle-ks true
-                        :black-can-castle-qs true}))
+                                :turn "white"
+                                :moves-cnt 0
+                                :eval 0
+                                :game-state :in-progress
+                                :game-pgn []
+                                :white-can-castle-ks true
+                                :white-can-castle-qs true
+                                :black-can-castle-ks true
+                                :black-can-castle-qs true}))
 
 (def uni-pieces {\R "♜", \N "♞", \B "♝", \Q "♛", \K "♚", \P "♟",
                  \r "♖", \n "♘", \b "♗", \q "♕", \k "♔", \p "♙", \- "·"})
@@ -66,12 +67,23 @@
         (-> board-state
         (assoc :board next-pos)
         (assoc :turn ({"white" "black" "black" "white"} (:turn board-state)))
-        (assoc :eval (evaluation/eval-position next-pos)))))
+        (assoc :eval (evaluation/eval-position next-pos))
+        (update-in [:game-pgn] conj move-str))))
 
 (defn both-kings-alive? [board-state]
     (< -500 (:eval board-state) 500))
 
+(defn readable-game-score [board-state]
+  (->> (:game-pgn board-state)
+                  (partition 2 2 nil)
+                  (map #(str (first %) " " (second %)))
+                  (map vector (range 1 (count (:game-pgn board-state))))
+                  (map #(str (first %) "." (second %)))
+                  (string/join " ")))
+
 (defn end-of-game-action [board-state]
     (if (> (:eval board-state) 0)
             (println "White Won")
-            (println "Black Won")))
+            (println "Black Won"))
+    (println "Game-Score:") 
+    (println (readable-game-score board-state)))
