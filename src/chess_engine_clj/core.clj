@@ -23,7 +23,7 @@
     (let [current-board (:board board-state)
           color (:turn board-state)
           valid-move-list (movegen/valid-move-list current-board (keyword color))
-          engine-choice (search/pick-best-move current-board color search/evaluation-at-depth 3)]
+          engine-choice (search/pick-best-move current-board color 3)]
         (println (str "Engine Move for " color " : " engine-choice "\n"))
         (board/make-move board-state engine-choice)))
 
@@ -38,4 +38,4 @@
     (if (not (board/both-kings-alive? curr-board-state))
         (board/end-of-game-action curr-board-state)
         (recur (update-board-state curr-board-state curr-player) 
-               ({player1 player2 player2 player1} curr-player)))))
+               ((zipmap [player1 player2] [player2 player1]) curr-player)))))

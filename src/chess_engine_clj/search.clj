@@ -13,11 +13,34 @@
              (map #(evaluation-at-depth % (dec depth) ({:white :black :black :white} color-to-max)))
              (apply (if (= color-to-max :white) max min))))))
 
-(defn pick-best-move [current-board color eval-function depth]
+;;With alpha-beta pruning
+(defn alpha-beta [current-board depth alpha beta color-to-max]
+  (if (zero? depth)
+      (evaluation/eval-position2 current-board)
+      (let [valid-move-list (movegen/valid-move-list current-board color-to-max)]
+        (if (= color-to-max :white)
+            (loop [move-list valid-move-list a alpha b beta]
+              (if (or (empty? move-list) (>= a b))
+                  a
+                  (let [a-new (alpha-beta (board/board-pos-after-move current-board 
+                                                                      (first move-list)) 
+                                          (dec depth) a b 
+                                          ({:white :black :black :white} color-to-max))]
+                  (recur (rest move-list) (max a a-new) b))))
+            (loop [move-list valid-move-list a alpha b beta]
+              (if (or (empty? move-list) (>= a b))
+                  b
+                  (let [b-new (alpha-beta (board/board-pos-after-move current-board 
+                                                                      (first move-list)) 
+                                          (dec depth) a b 
+                                          ({:white :black :black :white} color-to-max))]
+                  (recur (rest move-list) a (min b b-new)))))))))
+
+(defn pick-best-move [current-board color depth]
   (let [valid-move-list (movegen/valid-move-list current-board (keyword color))]
   (->> valid-move-list
-       (map #(board/board-pos-after-move current-board %))
-       (pmap #(eval-function % (dec depth) ({:white :black :black :white} (keyword color))))
+       (pmap #(board/board-pos-after-move current-board %))
+       (pmap #(alpha-beta % (dec depth) -10000 10000 ({:white :black :black :white} (keyword color))))
        (map vector valid-move-list)
        (sort-by second)
        ((if (= color "white") last first))
