@@ -2,7 +2,6 @@
     (:require [clojure.string :as string]
               [chess-engine-clj.board :as board]
               [chess-engine-clj.movegen :as movegen]
-              [chess-engine-clj.evaluation :as evaluation]
               [chess-engine-clj.search :as search])
   (:gen-class))
 
@@ -32,10 +31,20 @@
 (defn update-board-state[board-state player]
     ((player-to-move-fn player) board-state))
 
-(defn -main [player1 player2]
+(defn game-play [player1 player2]
   (loop [curr-board-state board/initial-board-state curr-player player1]
     (println (board/pretty-print curr-board-state))
     (if (not (board/both-kings-alive? curr-board-state))
         (board/end-of-game-action curr-board-state)
         (recur (update-board-state curr-board-state curr-player) 
                ((zipmap [player1 player2] [player2 player1]) curr-player)))))
+
+(defn ask-for-new-game [player1 player2]
+  (let [response (do (print "want to play another game?(y/n)") (flush) (read-line))]
+    (if (= response "y")
+        (game-play player2 player1)
+        (println "bye"))))
+
+(defn -main [player1 player2]
+  (game-play player1 player2)
+  (ask-for-new-game player1 player2))
