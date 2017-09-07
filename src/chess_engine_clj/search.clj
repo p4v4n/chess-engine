@@ -10,13 +10,14 @@
       (let [v-li (movegen/valid-move-list current-board color-to-max)]
         (->> v-li
              (map #(board/board-pos-after-move current-board %))
-             (map #(evaluation-at-depth % (dec depth) ({:white :black :black :white} color-to-max)))
+             (map #(evaluation-at-depth % (dec depth) (board/next-color-map color-to-max)))
              (apply (if (= color-to-max :white) max min))))))
-
+;;-----------
 ;;With alpha-beta pruning
 (defn alpha-beta [current-board depth alpha beta color-to-max]
-  (if (or (zero? depth) (not (< -10000 (evaluation/eval-position current-board) 10000)))
-      (evaluation/eval-position current-board)
+  (let [current-eval (evaluation/eval-position current-board)]
+  (if (or (zero? depth) (not (< -10000 current-eval 10000)))
+      current-eval
       (let [valid-move-list (movegen/valid-move-list current-board color-to-max)]
         (if (= color-to-max :white)
             (loop [move-list valid-move-list a alpha b beta]
@@ -25,7 +26,7 @@
                   (let [a-new (alpha-beta (board/board-pos-after-move current-board 
                                                                       (first move-list)) 
                                           (dec depth) a b 
-                                          ({:white :black :black :white} color-to-max))]
+                                          (board/next-color-map color-to-max))]
                   (recur (rest move-list) (max a a-new) b))))
             (loop [move-list valid-move-list a alpha b beta]
               (if (or (empty? move-list) (>= a b))
@@ -33,15 +34,15 @@
                   (let [b-new (alpha-beta (board/board-pos-after-move current-board 
                                                                       (first move-list)) 
                                           (dec depth) a b 
-                                          ({:white :black :black :white} color-to-max))]
-                  (recur (rest move-list) a (min b b-new)))))))))
+                                          (board/next-color-map color-to-max))]
+                  (recur (rest move-list) a (min b b-new))))))))))
 
 (defn pick-best-move [current-board color depth]
-  (let [valid-move-list (movegen/valid-move-list current-board (keyword color))]
+  (let [valid-move-list (movegen/valid-move-list current-board color)]
     (->> valid-move-list
          (pmap #(board/board-pos-after-move current-board %))
-         (pmap #(alpha-beta % (dec depth) -100000 100000 ({:white :black :black :white} (keyword color))))
+         (pmap #(alpha-beta % (dec depth) -100000 100000 (board/next-color-map color)))
          (map vector valid-move-list)
          (sort-by second)
-         ((if (= color "white") last first))
+         ((if (= color :white) last first))
          first)))

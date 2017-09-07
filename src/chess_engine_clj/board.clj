@@ -12,7 +12,7 @@
                     [\R \N \B \Q \K \B \N \R]])
 
 (def initial-board-state {:board initial-board
-                          :turn "white"
+                          :turn :white
                           :moves-cnt 0
                           :eval 0
                           :game-state :in-progress
@@ -41,6 +41,8 @@
 
 ;;---------------Game Play Helpers---------------
 
+(def next-color-map {:white :black :black :white})
+
 (defn parse-square [square-id]
     (let [[fil-id rank] [(subs square-id 0 1) (Integer/parseInt (subs square-id 1))]
           fil (->> [fil-id "a"]
@@ -63,7 +65,7 @@
     (let [next-pos (board-pos-after-move (:board board-state) move-str)]
         (-> board-state
         (assoc :board next-pos)
-        (assoc :turn ({"white" "black" "black" "white"} (:turn board-state)))
+        (assoc :turn (next-color-map (:turn board-state)))
         (assoc :eval (evaluation/eval-position next-pos))
         (update-in [:game-pgn] conj move-str))))
 
@@ -83,13 +85,14 @@
     (loop [moves move-li curr-board initial-board turn "white" move-no 1]
       (if (empty? moves)
           (println "---------")
-          (let [next-board (board-pos-after-move curr-board (first moves))]
-            (println move-no turn "moves:" (first moves) "\n")
+          (let [[current-move & rest-moves] moves
+                 next-board (board-pos-after-move curr-board current-move)]
+            (println move-no turn "moves:" current-move "\n")
             (println (pretty-print {:board next-board}))
             (Thread/sleep 1000)
             (if (= turn "white")
-                (recur (rest moves) next-board "black" move-no)
-                (recur (rest moves) next-board "white" (inc move-no))))))))
+                (recur rest-moves next-board "black" move-no)
+                (recur rest-moves next-board "white" (inc move-no))))))))
 
 (defn end-of-game-action [board-state]
     (if (> (:eval board-state) 0)

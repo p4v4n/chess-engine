@@ -9,7 +9,7 @@
     (let [user-choice (do (print "user move:") (flush) (read-line))
           color (:turn board-state)
           current-board (:board board-state)
-          valid-move-list (movegen/valid-move-list current-board (keyword color))]
+          valid-move-list (movegen/valid-move-list current-board color)]
         (if (contains? (set valid-move-list) user-choice)
             (do (println (str "user move for " color " : " user-choice "\n"))
                 (board/make-move board-state user-choice))          
@@ -19,7 +19,7 @@
 (defn engine-move [board-state]
     (let [current-board (:board board-state)
           color (:turn board-state)
-          valid-move-list (movegen/valid-move-list current-board (keyword color))
+          valid-move-list (movegen/valid-move-list current-board color)
           engine-choice (search/pick-best-move current-board color 3)]
         (println (str "engine move for " color " : " engine-choice "\n"))
         (board/make-move board-state engine-choice)))
