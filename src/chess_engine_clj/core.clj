@@ -6,16 +6,14 @@
   (:gen-class))
 
 (defn user-move [board-state]
-  (println "User Move: ")
-    (let [user-choice (string/trim (read-line))
+    (let [user-choice (do (print "user move:") (flush) (read-line))
           color (:turn board-state)
           current-board (:board board-state)
           valid-move-list (movegen/valid-move-list current-board (keyword color))]
-        (if (and (board/is-valid-move? user-choice)
-                 (contains? (set valid-move-list) user-choice))
-            (do (println (str "User Move for " color " : " user-choice "\n"))
+        (if (contains? (set valid-move-list) user-choice)
+            (do (println (str "user move for " color " : " user-choice "\n"))
                 (board/make-move board-state user-choice))          
-            (do (println "Please enter a valid move like b1c3")
+            (do (println "please enter a valid move!")
                 (user-move board-state)))))
 
 (defn engine-move [board-state]
@@ -23,7 +21,7 @@
           color (:turn board-state)
           valid-move-list (movegen/valid-move-list current-board (keyword color))
           engine-choice (search/pick-best-move current-board color 3)]
-        (println (str "Engine Move for " color " : " engine-choice "\n"))
+        (println (str "engine move for " color " : " engine-choice "\n"))
         (board/make-move board-state engine-choice)))
 
 (def player-to-move-fn {"user" user-move "engine" engine-move})
@@ -43,7 +41,7 @@
   (let [response (do (print "want to play another game?(y/n)") (flush) (read-line))]
     (if (= response "y")
         (game-play player2 player1)
-        (println "bye"))))
+        (println "bye for now!"))))
 
 (defn -main [player1 player2]
   (game-play player1 player2)

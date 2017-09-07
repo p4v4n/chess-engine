@@ -52,9 +52,6 @@
   (let [[full-move s1 s2] (re-find #"^([a-h][1-8])([a-h][1-8])$" move-str)]
     (vector (parse-square s1) (parse-square s2))))
 
-(defn is-valid-move? [move-str]
-  (re-find #"^([a-h][1-8])([a-h][1-8])$" move-str))
-
 (defn board-pos-after-move [board-pos move-str]
     (let [[first-id second-id] (parse-movestr move-str)
           moving-piece (get-in board-pos first-id)]
@@ -67,7 +64,7 @@
         (-> board-state
         (assoc :board next-pos)
         (assoc :turn ({"white" "black" "black" "white"} (:turn board-state)))
-        (assoc :eval (evaluation/eval-position2 next-pos))
+        (assoc :eval (evaluation/eval-position next-pos))
         (update-in [:game-pgn] conj move-str))))
 
 (defn both-kings-alive? [board-state]

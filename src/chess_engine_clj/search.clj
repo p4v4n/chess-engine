@@ -6,7 +6,7 @@
 ;;Mini-Max Algorithm
 (defn evaluation-at-depth [current-board depth color-to-max]
   (if (= depth 0)
-      (evaluation/eval-position2 current-board)
+      (evaluation/eval-position current-board)
       (let [v-li (movegen/valid-move-list current-board color-to-max)]
         (->> v-li
              (map #(board/board-pos-after-move current-board %))
@@ -15,8 +15,8 @@
 
 ;;With alpha-beta pruning
 (defn alpha-beta [current-board depth alpha beta color-to-max]
-  (if (or (zero? depth) (not (< -10000 (evaluation/eval-position2 current-board) 10000)))
-      (evaluation/eval-position2 current-board)
+  (if (or (zero? depth) (not (< -10000 (evaluation/eval-position current-board) 10000)))
+      (evaluation/eval-position current-board)
       (let [valid-move-list (movegen/valid-move-list current-board color-to-max)]
         (if (= color-to-max :white)
             (loop [move-list valid-move-list a alpha b beta]
