@@ -1,7 +1,7 @@
 (ns chess-engine-clj.evaluation)
 
-;;Evaluation from white-side
-;;;  Tomasz Michniewski's  Simplified evaluation function
+;; Evaluation from white-side
+;; Using Tomasz Michniewski's  Simplified evaluation function
 
 (def piece-value {\K  20000 \Q   900  \R  500
                   \B  300 \N  300  \P  100
@@ -70,15 +70,28 @@
     [ 20  20   0   0   0   0  20  20 ]
     [ 20  30  10   0   0  10  30  20 ]]})
 
+(defn bonus-eval-convert-for-black [[piece-type bonus-eval-table]]
+  (vector ((comp first seq clojure.string/lower-case) piece-type) 
+          (->> bonus-eval-table
+               flatten
+               (map -)
+               reverse
+               (partition 8)
+               (map vec)
+               vec)))
+
+(def black-bonus-eval-tables (->> (into [] white-bonus-eval-tables)
+                                  (map bonus-eval-convert-for-black)
+                                  (into {})))
+
+(def bonus-eval-tables (merge white-bonus-eval-tables
+                              black-bonus-eval-tables))
 
 (defn piece-contribution [[location-ind piece-type]]
-  (cond
-    (= piece-type \-) 0
-    (Character/isUpperCase piece-type) (+ (piece-value piece-type) 
-                                          (get-in (white-bonus-eval-tables piece-type) location-ind))
-    :else (- (piece-value piece-type) 
-             (get-in (white-bonus-eval-tables ((comp first seq clojure.string/upper-case) piece-type))
-                     (mapv - [7 7] location-ind)))))
+  (if (= piece-type \-) 
+      0
+      (+ (piece-value piece-type) 
+         (get-in (bonus-eval-tables piece-type) location-ind))))
 
 (defn eval-position [board-vec]
   (->> (flatten board-vec)
