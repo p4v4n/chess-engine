@@ -141,10 +141,9 @@
 
 ;---------
 
-(def piece-function-map {\n knight-moves-vec \k king-basic-moves-vec \p pawn-moves-vec
-                         \q queen-moves-vec \r rook-moves-vec \b bishop-moves-vec
-                         \N knight-moves-vec \K king-basic-moves-vec \P pawn-moves-vec
-                         \Q queen-moves-vec \R rook-moves-vec \B bishop-moves-vec})
+(def piece-function-map {"n" knight-moves-vec "k" king-basic-moves-vec 
+                         "p" pawn-moves-vec "q" queen-moves-vec 
+                         "r" rook-moves-vec "b" bishop-moves-vec})
 
 (defn piece-location-fn [color]
   (case color
@@ -153,6 +152,8 @@
 
 (defn valid-move-list [board-vec color]
     (->> ((piece-location-fn color) board-vec)
-         (mapv #((piece-function-map (get-in board-vec %)) board-vec color %))
+         (map #((piece-function-map (-> (get-in board-vec %)
+                                        (clojure.string/lower-case))) 
+              board-vec color %))
          (apply concat)
          (mapv id-to-move-str)))
