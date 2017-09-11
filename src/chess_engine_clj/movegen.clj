@@ -157,10 +157,56 @@
     :white white-piece-location
     :black black-piece-location))
 
-(defn valid-move-list [board-vec color]
+(defn normal-move-list [[board-vec color]]
     (->> ((piece-location-fn color) board-vec)
          (map #((piece-function-map (-> (get-in board-vec %)
                                         (clojure.string/lower-case))) 
               board-vec color %))
          (apply concat)
          (mapv #(update-in % [:move] id-to-move-str))))
+
+;--------Special Moves
+
+;;---castling
+
+(defn ks-castling-move [[board-vec color]]
+  (->> ({:black 0 :white 7} color)
+       (get board-vec)
+       (drop 4)
+       (string/join "")
+       string/lower-case
+       (= "k--r")
+       (#(if % {:move "o-o" :piece-type \c}))))
+
+(defn qs-castling-move [[board-vec color]]
+  (->> ({:black 0 :white 7} color)
+       (get board-vec)
+       (take 5)
+       (string/join "")
+       string/lower-case
+       (= "r---k")
+       (#(if % {:move "o-o-o" :piece-type \c}))))
+
+(defn castling-moves-vec [[board-vec color]]
+  (->> [board-vec color]
+       ((juxt ks-castling-move qs-castling-move))
+       (remove nil?)))
+
+;;---pawn-promotion
+;turn pawn-move on 7th rank to pawn-promotion move
+
+(defn turn-to-promotion [color move-map]
+  (if (and (= \p (:piece-type move-map))
+           (= ({:white \7 :black \2} color) 
+              (get-in move-map [:move 1])))
+      (->> [\q \r \n \b]
+           (map #(str (:move-map) \= %))
+           (map #(hash-map :move % :piece-type \o)))
+      move-map))
+
+(defn valid-move-list [board-vec color]
+  (->> [board-vec color]
+       ((juxt normal-move-list castling-moves-vec))
+       (apply concat)
+       (mapv #(turn-to-promotion color %))
+       flatten))
