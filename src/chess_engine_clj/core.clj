@@ -2,17 +2,19 @@
     (:require [clojure.string :as string]
               [chess-engine-clj.board :as board]
               [chess-engine-clj.movegen :as movegen]
-              [chess-engine-clj.search :as search])
+              [chess-engine-clj.search :as search]
+              [chess-engine-clj.check :as check])
   (:gen-class))
 
 (defn user-move [board-state]
     (let [user-choice (do (print "user move:") (flush) (read-line))
+          user-choice-map (hash-map :move user-choice)
           color (:turn board-state)
           current-board (:board board-state)
           valid-move-list (movegen/valid-move-list current-board color)]
-        (if (contains? (set valid-move-list) user-choice)
+        (if (contains? (set (map :move valid-move-list)) user-choice)
             (do (println (str "user move for " color " : " user-choice "\n"))
-                (board/make-move board-state user-choice))          
+                (board/make-move board-state user-choice-map))          
             (do (println "please enter a valid move!")
                 (user-move board-state)))))
 

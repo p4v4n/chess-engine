@@ -1,4 +1,6 @@
-(ns chess-engine-clj.movegen)
+(ns chess-engine-clj.movegen
+  (:require [clojure.string :as string]
+            [chess-engine-clj.board :as board]))
 
 ;;-----Generating Moves ----------
 
@@ -87,7 +89,8 @@
          (map #(mapv + curr-locn %))
          (filter inside-the-board?)
          (remove #((is-friendly-piece? color) board-vec %))
-         (mapv #(vector curr-locn %))))
+         (map #(vector curr-locn %))
+         (mapv #(hash-map :move % :piece-type \n))))
 
 ;------King---------
 
@@ -96,7 +99,8 @@
         (map #(mapv + curr-locn %))
         (filter inside-the-board?)
         (remove #((is-friendly-piece? color) board-vec %))
-        (mapv #(vector curr-locn %))))
+        (map #(vector curr-locn %))
+        (mapv #(hash-map :move % :piece-type \k))))
 
 ;--------Pawn----------
 
@@ -106,14 +110,16 @@
             (drop-last (pawn-basic-moves color)))
         (map #(mapv + curr-locn %))
         (take-while #(empty-square? board-vec %))
-        (mapv #(vector curr-locn %))))
+        (map #(vector curr-locn %))
+        (mapv #(hash-map :move % :piece-type \p))))
 
 (defn pawn-capture-moves-vec [board-vec color curr-locn]
     (->> (pawn-capture-moves color)
          (map #(mapv + curr-locn %))
          (filter inside-the-board?)
          (filter #((is-enemy-piece? color) board-vec %))
-         (mapv #(vector curr-locn %))))
+         (map #(vector curr-locn %))
+         (mapv #(hash-map :move % :piece-type \p))))
 
 (defn pawn-moves-vec [board-vec color curr-locn]
     (concat (pawn-basic-moves-vec board-vec color curr-locn)
@@ -129,15 +135,16 @@
          (take-until #((is-enemy-piece? color) board-vec %))
          (take-while #(not ((is-friendly-piece? color) board-vec %)))))
 
-(defn long-range-moves-all-dirn [board-vec color curr-locn dirn-vec]
+(defn long-range-moves-all-dirn [board-vec color curr-locn dirn-vec piece-type]
     (->> dirn-vec
          (map #(long-range-moves-single-dirn board-vec color curr-locn %))
          (apply concat)
-         (mapv #(vector curr-locn %))))
+         (map #(vector curr-locn %))
+         (mapv #(hash-map :move % :piece-type piece-type))))
 
-(def queen-moves-vec #(long-range-moves-all-dirn %1 %2 %3 all-directions))
-(def rook-moves-vec #(long-range-moves-all-dirn %1 %2 %3 rook-directions))
-(def bishop-moves-vec #(long-range-moves-all-dirn %1 %2 %3 bishop-directions))
+(def queen-moves-vec #(long-range-moves-all-dirn %1 %2 %3 all-directions \q))
+(def rook-moves-vec #(long-range-moves-all-dirn %1 %2 %3 rook-directions \r))
+(def bishop-moves-vec #(long-range-moves-all-dirn %1 %2 %3 bishop-directions \b))
 
 ;---------
 
@@ -156,4 +163,4 @@
                                         (clojure.string/lower-case))) 
               board-vec color %))
          (apply concat)
-         (mapv id-to-move-str)))
+         (mapv #(update-in % [:move] id-to-move-str))))

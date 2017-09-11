@@ -54,31 +54,33 @@
   (let [[full-move s1 s2] (re-find #"^([a-h][1-8])([a-h][1-8])$" move-str)]
     (vector (parse-square s1) (parse-square s2))))
 
-(defn board-pos-after-move [board-pos move-str]
-    (let [[first-id second-id] (parse-movestr move-str)
+(defn board-pos-after-move [board-pos move-map]
+    (let [move-str (:move move-map)
+          [first-id second-id] (parse-movestr move-str)
           moving-piece (get-in board-pos first-id)]
         (-> board-pos
             (assoc-in first-id \-)
             (assoc-in second-id moving-piece))))
 
-(defn make-move [board-state move-str]
-    (let [next-pos (board-pos-after-move (:board board-state) move-str)]
+(defn make-move [board-state move-map]
+    (let [next-pos (board-pos-after-move (:board board-state) move-map)]
         (-> board-state
         (assoc :board next-pos)
         (assoc :turn (next-color-map (:turn board-state)))
         (assoc :eval (evaluation/eval-position next-pos))
-        (update-in [:game-pgn] conj move-str))))
+        (update-in [:game-pgn] conj move-map))))
 
 (defn both-kings-alive? [board-state]
     (< -10000 (:eval board-state) 10000))
 
 (defn readable-game-score [board-state]
   (->> (:game-pgn board-state)
-                  (partition 2 2 nil)
-                  (map #(str (first %) " " (second %)))
-                  (map vector (range 1 (count (:game-pgn board-state))))
-                  (map #(str (first %) "." (second %)))
-                  (string/join " ")))
+       (map :move)
+       (partition 2 2 nil)
+       (map #(str (first %) " " (second %)))
+       (map vector (range 1 (count (:game-pgn board-state))))
+       (map #(str (first %) "." (second %)))
+       (string/join " ")))
 
 (defn replay-game [board-state]
   (let [move-li (:game-pgn board-state)]
