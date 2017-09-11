@@ -58,3 +58,24 @@
          (apply concat)
          set))
 
+;;--Filtering illegal moves
+
+(defn king-location [board-vec color]
+  (first 
+    (filter (comp #(= % (if (= color :white) \K \k))
+                #(get-in board-vec %))
+           (for [x (range 8)
+                 y (range 8)]
+                [x y]))))
+
+(defn is-king-in-check? [board-vec color]
+  (contains? (control-square-list board-vec (board/next-color-map color))
+             (king-location board-vec color)))
+
+(defn is-illegal-move? [curr-board color-to-move move-str]
+  (let [next-board (board/board-pos-after-move curr-board move-str)]
+    (is-king-in-check? next-board color-to-move)))
+
+(defn legal-move-list [curr-board color-to-move]
+  (->> (movegen/valid-move-list curr-board color-to-move)
+       (remove #(is-illegal-move? curr-board color-to-move %))))
