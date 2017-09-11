@@ -54,7 +54,7 @@
   (let [[full-move s1 s2] (re-find #"^([a-h][1-8])([a-h][1-8])$" move-str)]
     (vector (parse-square s1) (parse-square s2))))
 
-(defn board-pos-after-move [board-pos move-map]
+(defn board-pos-after-normal-move [board-pos move-map]
     (let [move-str (:move move-map)
           [first-id second-id] (parse-movestr move-str)
           moving-piece (get-in board-pos first-id)]
@@ -62,8 +62,36 @@
             (assoc-in first-id \-)
             (assoc-in second-id moving-piece))))
 
+(defn board-pos-after-promotion [board-pos move-map]
+  (let [move-str (:move move-map)
+        [first-id second-id] (parse-movestr move-str)
+        target-piece (last move-str)]
+    (->> (subs move-str 0 4)
+         (assoc move-map :move)
+         (board-pos-after-normal-move board-pos)
+         (assoc-in second-id target-piece))))
+
+(defn board-pos-after-castling [board-pos move-map turn]
+  (let [row-to-modify ({:white 7 :black 0} turn)
+        ks-formation (if (= turn :white) [\- \R \K \-] [\- \r \k \-])
+        qs-formation (if (= turn :white) [\- \- \K \R \-] [\- \- \k \r \-])
+        current-row (board-pos row-to-modify)
+        modified-row (vec (if (= (:move move-map) "o-o")
+                              (concat (take 4 current-row) ks-formation)
+                              (concat qs-formation (drop 5 current-row))))]
+    (-> board-pos
+        (assoc row-to-modify modified-row))))
+
+(defn board-pos-after-move [board-pos move-map turn]
+  (case (:piece-type move-map)
+    \c (board-pos-after-castling board-pos move-map turn)
+    \o (board-pos-after-promotion board-pos move-map)
+    (board-pos-after-normal-move board-pos move-map)))
+
 (defn make-move [board-state move-map]
-    (let [next-pos (board-pos-after-move (:board board-state) move-map)]
+    (let [next-pos (board-pos-after-move (:board board-state) 
+                                         move-map 
+                                         (:turn board-state))]
         (-> board-state
         (assoc :board next-pos)
         (assoc :turn (next-color-map (:turn board-state)))

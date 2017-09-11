@@ -8,11 +8,13 @@
 
 (defn user-move [board-state]
     (let [user-choice (do (print "user move:") (flush) (read-line))
-          user-choice-map (hash-map :move user-choice)
           color (:turn board-state)
           current-board (:board board-state)
-          valid-move-list (movegen/valid-move-list current-board color)]
-        (if (contains? (set (map :move valid-move-list)) user-choice)
+          valid-move-list (movegen/valid-move-list current-board color)
+          user-choice-map (->> valid-move-list
+                               (filter #(= user-choice (:move %)))
+                               first)]
+        (if user-choice-map
             (do (println (str "user move for " color " : " user-choice "\n"))
                 (board/make-move board-state user-choice-map))          
             (do (println "please enter a valid move!")

@@ -9,7 +9,7 @@
       (evaluation/eval-position current-board)
       (let [v-li (movegen/valid-move-list current-board color-to-max)]
         (->> v-li
-             (map #(board/board-pos-after-move current-board %))
+             (map #(board/board-pos-after-move current-board % color-to-max))
              (map #(evaluation-at-depth % (dec depth) (board/next-color-map color-to-max)))
              (apply (if (= color-to-max :white) max min))))))
 ;;-----------
@@ -24,7 +24,8 @@
               (if (or (empty? move-list) (>= a b))
                   a
                   (let [a-new (alpha-beta (board/board-pos-after-move current-board 
-                                                                      (first move-list)) 
+                                                                      (first move-list)
+                                                                      color-to-max) 
                                           (dec depth) a b 
                                           (board/next-color-map color-to-max))]
                   (recur (rest move-list) (max a a-new) b))))
@@ -32,7 +33,8 @@
               (if (or (empty? move-list) (>= a b))
                   b
                   (let [b-new (alpha-beta (board/board-pos-after-move current-board 
-                                                                      (first move-list)) 
+                                                                      (first move-list)
+                                                                      color-to-max) 
                                           (dec depth) a b 
                                           (board/next-color-map color-to-max))]
                   (recur (rest move-list) a (min b b-new))))))))))
@@ -40,8 +42,8 @@
 (defn pick-best-move [current-board color depth]
   (let [valid-move-list (movegen/valid-move-list current-board color)]
     (->> valid-move-list
-         (pmap #(board/board-pos-after-move current-board %))
-         (pmap #(alpha-beta % (dec depth) -100000 100000 (board/next-color-map color)))
+         (map #(board/board-pos-after-move current-board % color))
+         (map #(alpha-beta % (dec depth) -100000 100000 (board/next-color-map color)))
          (map vector valid-move-list)
          (sort-by second)
          ((if (= color :white) last first))
