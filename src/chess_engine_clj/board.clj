@@ -62,10 +62,14 @@
             (assoc-in first-id \-)
             (assoc-in second-id moving-piece))))
 
-(defn board-pos-after-promotion [board-pos move-map]
+(defn board-pos-after-promotion [board-pos move-map turn]
   (let [move-str (:move move-map)
         [first-id second-id] (parse-movestr move-str)
-        target-piece (last move-str)]
+        t-piece (last move-str)
+        target-piece (if (= turn :white)
+                         (->> t-piece
+                              (comp first seq string/upper-case))
+                         t-piece)]
     (->> (subs move-str 0 4)
          (assoc move-map :move)
          (board-pos-after-normal-move board-pos)
@@ -82,10 +86,19 @@
     (-> board-pos
         (assoc row-to-modify modified-row))))
 
+(defn board-pos-after-enpassant [board-pos move-map turn]
+  (let [move-str (:move move-map)
+        [first-id second-id] (parse-movestr move-str)
+        third-id [(first first-id) (second second-id)]
+        moving-piece (get-in board-pos first-id)]
+    (-> (board-pos-after-normal-move board-pos move-map)
+        (assoc-in third-id \-))))
+
 (defn board-pos-after-move [board-pos move-map turn]
   (case (:piece-type move-map)
     \c (board-pos-after-castling board-pos move-map turn)
-    \o (board-pos-after-promotion board-pos move-map)
+    \o (board-pos-after-promotion board-pos move-map turn)
+    \e (board-pos-after-enpassant board-pos move-map turn)
     (board-pos-after-normal-move board-pos move-map)))
 
 (defn make-move [board-state move-map]
