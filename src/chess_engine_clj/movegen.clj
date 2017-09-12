@@ -200,13 +200,15 @@
            (= ({:white \7 :black \2} color) 
               (get-in move-map [:move 1])))
       (->> [\q \r \n \b]
-           (map #(str (:move-map) \= %))
+           (map #(str (:move move-map) \= %))
            (map #(hash-map :move % :piece-type \o)))
       move-map))
 
-(defn valid-move-list [board-vec color]
+(defn valid-move-list [board-state]
+  (let [color (:turn board-state)
+        board-vec (:board board-state)]
   (->> [board-vec color]
        ((juxt normal-move-list castling-moves-vec))
        (apply concat)
        (mapv #(turn-to-promotion color %))
-       flatten))
+       flatten)))

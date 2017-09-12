@@ -9,8 +9,7 @@
 (defn user-move [board-state]
     (let [user-choice (do (print "user move:") (flush) (read-line))
           color (:turn board-state)
-          current-board (:board board-state)
-          valid-move-list (movegen/valid-move-list current-board color)
+          valid-move-list (movegen/valid-move-list board-state)
           user-choice-map (->> valid-move-list
                                (filter #(= user-choice (:move %)))
                                first)]
@@ -21,10 +20,9 @@
                 (user-move board-state)))))
 
 (defn engine-move [board-state]
-    (let [current-board (:board board-state)
-          color (:turn board-state)
-          valid-move-list (movegen/valid-move-list current-board color)
-          engine-choice (search/pick-best-move current-board color 3)]
+    (let [color (:turn board-state)
+          valid-move-list (movegen/valid-move-list board-state)
+          engine-choice (search/pick-best-move board-state 3)]
         (println (str "engine move for " color " : " engine-choice "\n"))
         (board/make-move board-state engine-choice)))
 

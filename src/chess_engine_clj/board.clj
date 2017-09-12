@@ -112,17 +112,18 @@
 
 (defn replay-game [board-state]
   (let [move-li (:game-pgn board-state)]
-    (loop [moves move-li curr-board initial-board turn "white" move-no 1]
+    (loop [moves move-li curr-board-state initial-board-state move-no 1]
       (if (empty? moves)
           (println "---------")
-          (let [[current-move & rest-moves] moves
-                 next-board (board-pos-after-move curr-board current-move)]
-            (println move-no turn "moves:" current-move "\n")
-            (println (pretty-print {:board next-board}))
+          (let [[current-move-map & rest-moves] moves
+                turn (:turn board-state)
+                next-board-state (make-move curr-board-state current-move-map)]
+            (println move-no turn "moves:" current-move-map "\n")
+            (println (pretty-print next-board-state))
             (Thread/sleep 1000)
             (if (= turn "white")
-                (recur rest-moves next-board "black" move-no)
-                (recur rest-moves next-board "white" (inc move-no))))))))
+                (recur rest-moves next-board-state move-no)
+                (recur rest-moves next-board-state (inc move-no))))))))
 
 (defn end-of-game-action [board-state]
     (if (> (:eval board-state) 0)

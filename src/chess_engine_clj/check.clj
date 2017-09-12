@@ -72,10 +72,12 @@
   (contains? (control-square-list board-vec (board/next-color-map color))
              (king-location board-vec color)))
 
-(defn is-illegal-move? [curr-board color-to-move move-str]
-  (let [next-board (board/board-pos-after-move curr-board move-str)]
+(defn is-illegal-move? [board-state move-str]
+  (let [curr-board (:board board-state)
+        color-to-move (:turn board-state)
+        next-board (board/board-pos-after-move curr-board move-str)]
     (is-king-in-check? next-board color-to-move)))
 
-(defn legal-move-list [curr-board color-to-move]
-  (->> (movegen/valid-move-list curr-board color-to-move)
-       (remove #(is-illegal-move? curr-board color-to-move %))))
+(defn legal-move-list [board-state]
+  (->> (movegen/valid-move-list board-state)
+       (remove #(is-illegal-move? board-state %))))
