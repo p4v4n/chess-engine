@@ -193,7 +193,8 @@
        (remove nil?)))
 
 ;;---enpassant
-(defn enpassant-move-list [board-state]
+
+(defn enpassant-possible? [board-state]
   (let [curr-board (:board board-state)
         turn (:turn board-state)
         last-move-map (->> (:game-pgn board-state)
@@ -201,13 +202,21 @@
         last-piece (:piece-type last-move-map)]
       (if (= \p last-piece)  
         (let [last-move (:move last-move-map)
-        [first-id second-id] (if last-move-map 
-                                 (board/parse-movestr last-move))
-        expected-rows (if (= :white turn)
-                          [1 3]
-                          [6 4])
-        actual-rows [(first first-id) (first second-id)]]
+             [first-id second-id] (if last-move-map 
+                                      (board/parse-movestr last-move))
+              expected-rows (if (= :white turn)
+                                [1 3]
+                                [6 4])
+              actual-rows [(first first-id) (first second-id)]]
     (if (= actual-rows expected-rows)
+        [first-id second-id])))))
+
+(defn enpassant-move-list [board-state]
+  (let [curr-board (:board board-state)
+        turn (:turn board-state)
+        enpassant-info (enpassant-possible? board-state)
+        [first-id second-id] enpassant-info]
+    (if en-info
         (let [opp-pawn (if (= :white turn) \P \p)
               side-squares (->> [-1 +1]
                                 (map #(+ % (second second-id)))
@@ -217,9 +226,9 @@
               (->> side-squares
                    (map #(vector % [(+ (first first-id) 
                                        ({:white 1 :black -1} turn)) 
-                                    (second first-id)]))
+                                       (second first-id)]))
                    (map id-to-move-str)
-                   (map #(hash-map :move % :piece-type \e))))))))))
+                   (map #(hash-map :move % :piece-type \e))))))))
 
 ;;---pawn-promotion
 ;turn pawn-move on 7th rank to pawn-promotion move
