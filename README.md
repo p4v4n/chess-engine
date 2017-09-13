@@ -6,8 +6,7 @@ A command-line chess engine in clojure.
 
 __Current Status:__
 
-- Special Rules are not yet implemented.(enpassant, castling, pawn promotion)
-- Engine uses mini-max algorithm and searches at 3 ply depth in reasonable time.
+- Engine uses mini-max algorithm with alpha-beta pruning and searches at 3 ply depth in reasonable time.
 
 ## Installation
 
@@ -19,11 +18,33 @@ __Current Status:__
 
 ## Usage
 
-ex: To play black against the engine
+Use the words 'user' and 'engine' to specify white/black players.
+
+ex : To play black against the engine
 
 ```
 lein run engine user
 ```
+
+#### __Move-Syntax:__
+
+__Normal-Moves:__
+
+Specify the starting+final loaction of the piece you intend to move
+
+ex : `e2e4`
+
+Similarly for piece-captures and enpassant
+
+ex : `e5d6`
+
+__Special-Moves:__
+
+Kingside-Castling : `o-o`
+
+QueenSide-Castling : `o-o-o`
+
+Pawn-Promotion : `a7b8=q`  or  `a7a8=n`
 
 ### Bugs
 
