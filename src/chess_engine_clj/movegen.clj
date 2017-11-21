@@ -214,8 +214,8 @@
 (defn enpassant-move-list [board-state]
   (let [curr-board (:board board-state)
         turn (:turn board-state)
-        enpassant-info (enpassant-possible? board-state)
-        [first-id second-id] enpassant-info]
+        en-info (enpassant-possible? board-state)
+        [first-id second-id] en-info]
     (if en-info
         (let [opp-pawn (if (= :white turn) \P \p)
               side-squares (->> [-1 +1]
